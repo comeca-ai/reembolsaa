@@ -153,7 +153,7 @@ function Navbar() {
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden md:block">
             Entrar
           </Link>
-          <Link to="/dashboard" className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+          <Link to="/comecar" className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
             Começar grátis
           </Link>
         </div>
@@ -188,7 +188,7 @@ function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link to="/dashboard" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-6 py-3 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
+          <Link to="/comecar" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-6 py-3 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
             Começar grátis
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -441,7 +441,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link to="/dashboard" className={`block text-center py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 ${
+              <Link to="/comecar" className={`block text-center py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 ${
                 highlight
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "border border-border text-foreground hover:bg-secondary"
@@ -505,7 +505,7 @@ function FinalCta() {
         <p className="text-muted-foreground text-lg">
           14 dias grátis. Sem cartão. Sem burocracia.
         </p>
-        <Link to="/dashboard" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-8 py-4 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
+        <Link to="/comecar" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-8 py-4 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
           Começar grátis agora
           <ArrowRight className="w-5 h-5" />
         </Link>

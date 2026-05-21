@@ -13,6 +13,7 @@ import ViolationDetailPage from './pages/ViolationDetailPage';
 import FinancialPage from './pages/FinancialPage';
 import NewExpensePage from './pages/NewExpensePage';
 import LandingPage from './pages/LandingPage';
+import OnboardingPage from './pages/OnboardingPage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -42,6 +43,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/landing" element={<LandingPage />} />
+      <Route path="/comecar" element={<OnboardingPage />} />
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
