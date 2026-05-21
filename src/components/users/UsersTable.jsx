@@ -64,22 +64,24 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                     </span>
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(user)}
-                        className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-7 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5"
                       >
                         <Pencil className="w-3 h-3" />
                         Editar acesso
                       </Button>
-                      <UserActions
-                        user={user}
-                        onEdit={onEdit}
-                        onRemove={onRemove}
-                        onResendInvite={onResendInvite}
-                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => onRemove(user.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </td>
                 </motion.tr>
