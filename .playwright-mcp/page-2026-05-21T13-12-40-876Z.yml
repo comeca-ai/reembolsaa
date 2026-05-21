@@ -1,0 +1,21 @@
+- generic [ref=e24]:
+  - generic [ref=e25]:
+    - generic [ref=e27]: R$
+    - generic [ref=e28]: Reembolsaaí
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - img [ref=e32]
+      - heading "Crie sua empresa" [level=1] [ref=e36]
+      - paragraph [ref=e37]: Olá, Maria Teste! Dê um nome à sua empresa para começar. Você será o administrador e poderá convidar a equipe depois.
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - text: Nome da empresa
+        - textbox "Nome da empresa" [active] [ref=e40]:
+          - /placeholder: Acme Ltda
+      - button "Criar empresa e entrar" [ref=e41] [cursor=pointer]:
+        - text: Criar empresa e entrar
+        - img
+    - generic [ref=e42]:
+      - img [ref=e43]
+      - generic [ref=e46]: Cada empresa tem dados isolados por Row-Level Security no Supabase.
+    - button "Sair" [ref=e47] [cursor=pointer]

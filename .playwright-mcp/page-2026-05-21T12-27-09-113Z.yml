@@ -1,0 +1,29 @@
+- generic [ref=e24]:
+  - generic [ref=e25]:
+    - generic [ref=e27]: R$
+    - generic [ref=e28]: Reembolsaaí
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - generic [ref=e31]: ✓
+      - text: Empresa
+    - generic [ref=e33]:
+      - generic [ref=e34]: "2"
+      - text: Política
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - img [ref=e38]
+        - generic [ref=e40]: Quase lá, Empresa Demo
+      - heading "Suba sua política de reembolso" [level=1] [ref=e41]
+      - paragraph [ref=e42]: Envie o PDF da sua política de despesas. Ele fica guardado de forma isolada por empresa e servirá de base para as regras de compliance.
+    - generic [ref=e43] [cursor=pointer]:
+      - img [ref=e45]
+      - generic [ref=e48]:
+        - paragraph [ref=e49]: Arraste o PDF aqui
+        - paragraph [ref=e50]: ou clique para selecionar · PDF, DOC
+    - button "Ir para o dashboard" [ref=e52] [cursor=pointer]:
+      - text: Ir para o dashboard
+      - img
+    - generic [ref=e53]:
+      - img [ref=e54]
+      - generic [ref=e57]: Arquivo isolado por empresa via Storage com Row-Level Security.

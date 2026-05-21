@@ -47,13 +47,15 @@ export default function KpiCard({ label, value, unit, delta, index, format = "nu
         <p className="text-[11px] text-muted-foreground mt-1">{unit}</p>
       </div>
 
-      <div className={`flex items-center gap-1 text-[11px] font-medium ${isGood ? "text-primary" : "text-destructive"}`}>
-        {positive
-          ? <TrendingUp className="w-3 h-3" />
-          : <TrendingDown className="w-3 h-3" />
-        }
-        <span>{positive ? "+" : ""}{delta}{format === "percent" ? "pp" : ""} vs. mês anterior</span>
-      </div>
+      {delta != null && (
+        <div className={`flex items-center gap-1 text-[11px] font-medium ${isGood ? "text-primary" : "text-destructive"}`}>
+          {positive
+            ? <TrendingUp className="w-3 h-3" />
+            : <TrendingDown className="w-3 h-3" />
+          }
+          <span>{positive ? "+" : ""}{delta}{format === "percent" ? "pp" : ""} vs. mês anterior</span>
+        </div>
+      )}
     </motion.div>
   );
 }

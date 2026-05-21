@@ -1,223 +1,319 @@
-import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Upload, ImagePlus, Loader2, CheckCircle2, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Loader2, CheckCircle2, PlusCircle, Upload, ImagePlus, X, Wand2, AlertTriangle, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CATEGORIAS, createDespesa, listPoliticas, extrairRecibo, uploadComprovante } from "@/api/despesas";
+import { analisarDespesa } from "@/api/politica";
+import { useAuth } from "@/lib/AuthContext";
 
-import ReceiptDropzone from "@/components/expense/ReceiptDropzone";
-import ExtractingState from "@/components/expense/ExtractingState";
-import ExpenseReviewForm from "@/components/expense/ExpenseReviewForm";
-import ComplianceVerdict from "@/components/expense/ComplianceVerdict";
+const today = () => new Date().toISOString().slice(0, 10);
+const brl = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
-// States: IDLE → EXTRACTING → REVIEW → VERDICT
 export default function NewExpensePage() {
-  const [stage, setStage] = useState("IDLE");
-  const [imageUrl, setImageUrl] = useState(null);
-  const [extracted, setExtracted] = useState(null);
-  const [verdict, setVerdict] = useState(null);
+  const navigate = useNavigate();
+  const { empresa, user, profile } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleImageUploaded = async (file) => {
-    setStage("EXTRACTING");
+  const { data: politicas = [] } = useQuery({ queryKey: ["politicas"], queryFn: listPoliticas });
 
-    // Upload the file
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setImageUrl(file_url);
+  const [form, setForm] = useState({
+    colaborador: profile?.nome || "",
+    centro_custo: "",
+    categoria: "Alimentação",
+    valor_brl: "",
+    data: today(),
+    observacao: "",
+  });
+  const [receipt, setReceipt] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+  const [ocr, setOcr] = useState(null);             // resposta do OCR (itens)
+  const [conformidade, setConformidade] = useState(null); // veredito do agente de análise
+  const [ocrStage, setOcrStage] = useState("");     // "lendo" | "analisando" | ""
 
-    // AI extraction
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é um assistente de reembolso corporativo. Analise esta imagem de comprovante/nota fiscal e extraia os dados estruturados.
-      
-      Extraia:
-      - vendor: nome do estabelecimento/fornecedor
-      - date: data no formato YYYY-MM-DD
-      - amount: valor total em reais (número, sem símbolo)
-      - category: categoria mais provável (Alimentação, Hospedagem, Transporte, Combustível, Material de escritório, Treinamento, Software, Representação, Eventos, Outros)
-      - description: breve descrição do que foi comprado
-      - items: array de itens se visíveis (cada item: name, value)
-      
-      Se algum campo não estiver legível, retorne null para ele.`,
-      file_urls: [file_url],
-      response_json_schema: {
-        type: "object",
-        properties: {
-          vendor: { type: "string" },
-          date: { type: "string" },
-          amount: { type: "number" },
-          category: { type: "string" },
-          description: { type: "string" },
-          items: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: { type: "string" },
-                value: { type: "number" }
-              }
-            }
-          }
-        }
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const polCat = politicas.find((p) => p.categoria === form.categoria);
+  const limite = polCat ? (polCat.diario_brl ?? polCat.por_noite_brl ?? polCat.teto_mes_brl) : null;
+  const valorNum = Number(form.valor_brl) || 0;
+  const acima = limite != null && valorNum > Number(limite);
+  const bloqueado = conformidade?.status === "revisar";
+  const motivosIA = conformidade?.motivos || [];
+  const precisaRevisar = acima || bloqueado;
+
+  const handleReceipt = async (file) => {
+    if (!file) return;
+    setError("");
+    setConformidade(null);
+    setReceipt(file);
+    if (file.type.startsWith("image/")) setPreview(URL.createObjectURL(file));
+    setOcrLoading(true);
+    try {
+      // 1) OCR — extrai os campos e itens do comprovante
+      setOcrStage("lendo");
+      const d = await extrairRecibo(file);
+      setOcr(d);
+      setForm((f) => ({
+        ...f,
+        valor_brl: d.valor_brl != null ? String(d.valor_brl) : f.valor_brl,
+        data: d.data || f.data,
+        categoria: CATEGORIAS.includes(d.categoria) ? d.categoria : f.categoria,
+        observacao: [d.descricao, d.fornecedor].filter(Boolean).join(" — ") || f.observacao,
+      }));
+      // 2) Agente de análise de política — decide aprovar/revisar com raciocínio
+      setOcrStage("analisando");
+      const verdict = await analisarDespesa({
+        despesa: d,
+        politicaTexto: empresa?.politica_texto,
+        politicas,
+      });
+      setConformidade(verdict);
+    } catch (err) {
+      setError(err?.message || "Não consegui ler o comprovante. Preencha manualmente.");
+    } finally {
+      setOcrLoading(false);
+      setOcrStage("");
+    }
+  };
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      let comprovante = null;
+      if (receipt) {
+        try { comprovante = await uploadComprovante(receipt, empresa.id); } catch (_) { /* segue sem anexo */ }
       }
-    });
+      return createDespesa({
+        empresaId: empresa?.id,
+        userId: user?.id,
+        colaborador: form.colaborador.trim() || profile?.nome || "Colaborador",
+        centro_custo: form.centro_custo.trim(),
+        categoria: form.categoria,
+        valor_brl: Number(form.valor_brl),
+        data: form.data,
+        observacao: form.observacao.trim(),
+        comprovante,
+        politicas,
+        bloqueado,
+        motivos: motivosIA,
+      });
+    },
+    onSuccess: (row) => {
+      queryClient.invalidateQueries({ queryKey: ["despesas"] });
+      setResult(row);
+    },
+    onError: (e) => setError(e?.message || "Erro ao salvar despesa"),
+  });
 
-    setExtracted(result);
-    setStage("REVIEW");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!form.valor_brl || valorNum <= 0) return setError("Informe um valor válido.");
+    if (!form.data) return setError("Informe a data.");
+    mutation.mutate();
   };
 
-  const handleSubmit = async (formData) => {
-    setStage("VERDICT");
-
-    // Notify manager by email
-    base44.integrations.Core.SendEmail({
-      to: "carlos@construtecbr.com.br", // gestor imediato
-      subject: `Nova despesa para revisão — ${formData.category} R$ ${Number(formData.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-      body: `Olá Carlos,\n\nMariana Costa submeteu uma nova solicitação de reembolso que aguarda sua revisão:\n\n• Categoria: ${formData.category}\n• Valor: R$ ${Number(formData.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}\n• Fornecedor: ${formData.vendor || "—"}\n• Data: ${formData.date || "—"}\n• Descrição: ${formData.description || "—"}\n\nAcesse o painel de Aprovações para analisar a solicitação.\n\nReembolsaaí`,
-    }).catch(() => {}); // fire-and-forget
-
-    // AI compliance check against policy rules
-    const check = await base44.integrations.Core.InvokeLLM({
-      prompt: `Você é um auditor de compliance de reembolsos corporativos. Avalie se esta despesa está em conformidade com a política da empresa.
-
-Despesa submetida:
-- Categoria: ${formData.category}
-- Valor: R$ ${formData.amount}
-- Fornecedor: ${formData.vendor}
-- Data: ${formData.date}
-- Descrição: ${formData.description}
-
-Regras da política vigente:
-- Alimentação: R$ 80/refeição, dias úteis, nota fiscal obrigatória
-- Hospedagem: R$ 450/diária, capitais, pré-aprovação acima de 3 diárias
-- Transporte: R$ 200/dia, app ou táxi, trajeto justificado
-- Combustível: R$ 1,20/km, veículo próprio, rota validada
-- Material de escritório: sem teto, nota fiscal obrigatória
-- Treinamento: sem teto, aprovação do gestor acima de R$ 2.000
-- Software: sem teto, aprovação de TI obrigatória
-- Representação: R$ 300/evento, lista de convidados obrigatória
-- Outros: requer justificativa detalhada
-
-Retorne sua avaliação.`,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          status: { type: "string", enum: ["approved", "review", "rejected"] },
-          score: { type: "number" },
-          reason: { type: "string" },
-          flags: { type: "array", items: { type: "string" } },
-          suggestions: { type: "array", items: { type: "string" } }
-        }
-      }
-    });
-
-    setVerdict({ ...check, formData, imageUrl });
-  };
-
-  const handleReset = () => {
-    setStage("IDLE");
-    setImageUrl(null);
-    setExtracted(null);
-    setVerdict(null);
-  };
+  // ---------- Resultado (veredito) ----------
+  if (result) {
+    const aprovada = !result._acima && !result._bloqueado;
+    const motivosResult = [
+      ...(result._acima ? [`Acima da política (excesso de ${brl(result.policy_excesso_brl)})`] : []),
+      ...((result._motivos || [])),
+    ];
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md bg-card border border-border rounded-2xl p-8 text-center space-y-4">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto ${aprovada ? "bg-primary/10" : "bg-warning/10"}`}>
+            {aprovada ? <CheckCircle2 className="w-7 h-7 text-primary" /> : <Clock className="w-7 h-7 text-warning" />}
+          </div>
+          <div>
+            <h1 className="font-heading text-2xl text-foreground mb-1">
+              {aprovada ? "Aprovada automaticamente" : "Enviada para análise"}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {aprovada
+                ? "A despesa está dentro da política e foi aprovada na hora."
+                : "A despesa precisa de análise antes do reembolso."}
+            </p>
+          </div>
+          {!aprovada && motivosResult.length > 0 && (
+            <ul className="text-left text-sm bg-warning/5 border border-warning/20 rounded-xl p-3 space-y-1">
+              {motivosResult.map((m, i) => (
+                <li key={i} className="flex items-start gap-2 text-foreground">
+                  <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" /> <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="bg-secondary/40 rounded-xl p-4 text-left text-sm space-y-1">
+            <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><span className="font-mono text-foreground">{brl(result.valor_brl)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Categoria</span><span className="text-foreground">{result.categoria}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="text-foreground">{aprovada ? "Aprovada" : "Pendente"}</span></div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => { setResult(null); setReceipt(null); setPreview(null); setForm({ colaborador: profile?.nome || "", centro_custo: "", categoria: "Alimentação", valor_brl: "", data: today(), observacao: "" }); }}>
+              Nova despesa
+            </Button>
+            <Button className="flex-1" onClick={() => navigate(aprovada ? "/dashboard" : "/aprovacoes")}>
+              {aprovada ? "Ir ao dashboard" : "Ver aprovações"}
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-7">
+      <div className="max-w-2xl mx-auto px-4 md:px-8 py-8 md:py-12">
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </Link>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao Dashboard
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="font-heading text-foreground text-2xl md:text-3xl">Lançar despesa</h1>
-              <p className="text-muted-foreground text-sm mt-1">Suba o comprovante — a IA extrai os dados automaticamente.</p>
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <PlusCircle className="w-5 h-5 text-primary" />
             </div>
-            {stage !== "IDLE" && (
-              <Button variant="ghost" size="sm" onClick={handleReset} className="text-muted-foreground gap-2">
-                <RefreshCw className="w-4 h-4" />
-                Novo lançamento
-              </Button>
-            )}
+            <div>
+              <h1 className="font-heading text-foreground text-2xl md:text-3xl">Nova despesa</h1>
+              <p className="text-muted-foreground text-sm mt-0.5">Suba a foto do comprovante — a IA preenche os campos.</p>
+            </div>
           </div>
         </motion.div>
 
-        {/* Step indicator */}
-        <StepIndicator stage={stage} />
-
-        {/* Content */}
-        <AnimatePresence mode="wait">
-          {stage === "IDLE" && (
-            <motion.div key="idle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-              <ReceiptDropzone onImageUploaded={handleImageUploaded} />
-            </motion.div>
-          )}
-
-          {stage === "EXTRACTING" && (
-            <motion.div key="extracting" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-              <ExtractingState />
-            </motion.div>
-          )}
-
-          {stage === "REVIEW" && (
-            <motion.div key="review" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-              <ExpenseReviewForm
-                extracted={extracted}
-                imageUrl={imageUrl}
-                onSubmit={handleSubmit}
-                onBack={handleReset}
-              />
-            </motion.div>
-          )}
-
-          {stage === "VERDICT" && verdict && (
-            <motion.div key="verdict" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-              <ComplianceVerdict verdict={verdict} onNew={handleReset} />
-            </motion.div>
-          )}
-
-          {stage === "VERDICT" && !verdict && (
-            <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4 py-20">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              <p className="text-muted-foreground text-sm">Verificando compliance…</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-      </div>
-    </div>
-  );
-}
-
-function StepIndicator({ stage }) {
-  const steps = [
-    { key: "IDLE",       label: "Comprovante" },
-    { key: "EXTRACTING", label: "Extração IA" },
-    { key: "REVIEW",     label: "Revisão" },
-    { key: "VERDICT",    label: "Veredito" },
-  ];
-  const current = steps.findIndex(s => s.key === stage);
-
-  return (
-    <div className="flex items-center gap-0">
-      {steps.map((step, i) => (
-        <React.Fragment key={step.key}>
-          <div className="flex flex-col items-center gap-1">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-semibold transition-all ${
-              i < current ? "bg-primary text-primary-foreground" :
-              i === current ? "bg-primary/20 text-primary border border-primary" :
-              "bg-secondary text-muted-foreground"
-            }`}>
-              {i < current ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
+        {/* Receipt dropzone */}
+        <div className="mb-6">
+          <input id="receipt-file" type="file" accept="image/*,.pdf" className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleReceipt(e.target.files[0])} />
+          {!receipt ? (
+            <div
+              onClick={() => document.getElementById("receipt-file").click()}
+              className="border-2 border-dashed border-border rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-all"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <ImagePlus className="w-6 h-6 text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="text-foreground text-sm font-medium">Subir foto do comprovante</p>
+                <p className="text-muted-foreground text-xs mt-0.5">JPG, PNG ou PDF · a IA lê e preenche</p>
+              </div>
             </div>
-            <span className={`text-[10px] ${i === current ? "text-primary" : "text-muted-foreground"}`}>{step.label}</span>
-          </div>
-          {i < steps.length - 1 && (
-            <div className={`flex-1 h-px mx-1 mb-4 ${i < current ? "bg-primary/40" : "bg-border"}`} />
+          ) : (
+            <div className="border border-border rounded-2xl p-4 flex items-center gap-4">
+              {preview ? (
+                <img src={preview} alt="comprovante" className="w-16 h-16 rounded-lg object-cover border border-border" />
+              ) : (
+                <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center"><Upload className="w-6 h-6 text-muted-foreground" /></div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-foreground text-sm font-medium truncate">{receipt.name}</p>
+                {ocrLoading ? (
+                  <p className="text-primary text-xs flex items-center gap-1.5 mt-1">
+                    <Wand2 className="w-3.5 h-3.5 animate-pulse" />
+                    {ocrStage === "analisando" ? "Agente analisando contra a política…" : "Lendo comprovante (OCR)…"}
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground text-xs mt-1">Campos preenchidos — confira abaixo.</p>
+                )}
+              </div>
+              <button onClick={() => { setReceipt(null); setPreview(null); }} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+            </div>
           )}
-        </React.Fragment>
-      ))}
+        </div>
+
+        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="colaborador">Colaborador</Label>
+              <Input id="colaborador" value={form.colaborador} onChange={(e) => set("colaborador", e.target.value)} placeholder="Seu nome" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="centro">Centro de custo</Label>
+              <Input id="centro" value={form.centro_custo} onChange={(e) => set("centro_custo", e.target.value)} placeholder="Ex.: Comercial" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Categoria</Label>
+              <Select value={form.categoria} onValueChange={(v) => set("categoria", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {limite != null && <p className="text-[11px] text-muted-foreground">Limite da política: {brl(limite)}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="valor">Valor (R$)</Label>
+              <Input id="valor" type="number" step="0.01" min="0" value={form.valor_brl} onChange={(e) => set("valor_brl", e.target.value)} placeholder="0,00" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="data">Data</Label>
+            <Input id="data" type="date" value={form.data} onChange={(e) => set("data", e.target.value)} />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="obs">Observação</Label>
+            <textarea id="obs" value={form.observacao} onChange={(e) => set("observacao", e.target.value)} rows={2}
+              placeholder="Detalhes do gasto..." className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/40" />
+          </div>
+
+          {/* Veredito ao vivo (numérico + restrições da política via IA) */}
+          {(valorNum > 0 || ocr) && (
+            precisaRevisar ? (
+              <div className="flex items-start gap-2.5 text-sm bg-warning/5 border border-warning/20 rounded-lg p-3">
+                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-warning font-medium">Fora da política — irá para análise</p>
+                  <ul className="text-muted-foreground text-xs mt-1 space-y-0.5 list-disc list-inside">
+                    {acima && <li>Excesso de {brl(valorNum - Number(limite))} sobre o limite de {brl(limite)}.</li>}
+                    {motivosIA.map((m, i) => <li key={i}>{m}</li>)}
+                  </ul>
+                  {conformidade?.raciocinio && <p className="text-muted-foreground text-[11px] mt-1.5 italic">🧠 {conformidade.raciocinio}</p>}
+                </div>
+              </div>
+            ) : (ocr || (valorNum > 0 && limite != null)) ? (
+              <div className="flex items-start gap-2.5 text-sm bg-primary/5 border border-primary/20 rounded-lg p-3">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-primary font-medium">Dentro da política — aprovação automática</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">{limite != null ? `Dentro do limite de ${brl(limite)} para ${form.categoria}.` : "Sem violações identificadas."}</p>
+                  {conformidade?.raciocinio && <p className="text-muted-foreground text-[11px] mt-1.5 italic">🧠 {conformidade.raciocinio}</p>}
+                </div>
+              </div>
+            ) : null
+          )}
+
+          {/* Itens lidos do comprovante */}
+          {ocr?.itens?.length > 0 && (
+            <div className="border border-border rounded-lg p-3">
+              <p className="text-[11px] text-muted-foreground mb-1.5">Itens identificados no comprovante</p>
+              <ul className="text-sm text-foreground space-y-0.5">
+                {ocr.itens.map((it, i) => (
+                  <li key={i} className="flex justify-between"><span>{it.nome}</span>{it.valor != null && <span className="font-mono text-muted-foreground">{brl(it.valor)}</span>}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {error && <p className="text-destructive text-sm">{error}</p>}
+
+          <Button type="submit" disabled={mutation.isPending || ocrLoading} className="w-full h-11 text-base">
+            {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Lançar despesa</>}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,67 @@
+- generic [ref=e7]:
+  - complementary [ref=e8]:
+    - generic [ref=e10]:
+      - generic [ref=e12]: R$
+      - generic [ref=e13]: Reembolsaaí
+    - navigation [ref=e14]:
+      - link "Dashboard" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e16]
+        - generic [ref=e21]: Dashboard
+      - link "Nova Despesa" [ref=e22] [cursor=pointer]:
+        - /url: /nova-despesa
+        - img [ref=e23]
+        - generic [ref=e25]: Nova Despesa
+        - img [ref=e26]
+      - link "Aprovações" [ref=e28] [cursor=pointer]:
+        - /url: /aprovacoes
+        - img [ref=e29]
+        - generic [ref=e32]: Aprovações
+      - link "Relatórios" [ref=e33] [cursor=pointer]:
+        - /url: /relatorios
+        - img [ref=e34]
+        - generic [ref=e36]: Relatórios
+      - link "Financeiro" [ref=e37] [cursor=pointer]:
+        - /url: /financeiro
+        - img [ref=e38]
+        - generic [ref=e41]: Financeiro
+      - link "Política" [ref=e42] [cursor=pointer]:
+        - /url: /politica
+        - img [ref=e43]
+        - generic [ref=e45]: Política
+      - link "Usuários" [ref=e46] [cursor=pointer]:
+        - /url: /usuarios
+        - img [ref=e47]
+        - generic [ref=e52]: Usuários
+      - link "Configurações" [ref=e53] [cursor=pointer]:
+        - /url: /configuracoes
+        - img [ref=e54]
+        - generic [ref=e57]: Configurações
+    - generic [ref=e58]:
+      - paragraph [ref=e59]: OCR Despesas SA
+      - generic [ref=e60]:
+        - generic [ref=e62]: JO
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Joao OCR
+          - paragraph [ref=e65]: despesa-ocr-test@empresa-demo.com
+        - button "Sair" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+  - main [ref=e70]:
+    - generic [ref=e126]:
+      - img [ref=e128]
+      - generic [ref=e131]:
+        - heading "Aprovada automaticamente" [level=1] [ref=e132]
+        - paragraph [ref=e133]: A despesa está dentro da política e foi aprovada na hora.
+      - generic [ref=e134]:
+        - generic [ref=e135]:
+          - generic [ref=e136]: Valor
+          - generic [ref=e137]: R$ 74,50
+        - generic [ref=e138]:
+          - generic [ref=e139]: Categoria
+          - generic [ref=e140]: Alimentação
+        - generic [ref=e141]:
+          - generic [ref=e142]: Status
+          - generic [ref=e143]: Aprovada
+      - generic [ref=e144]:
+        - button "Nova despesa" [ref=e145] [cursor=pointer]
+        - button "Ir ao dashboard" [ref=e146] [cursor=pointer]

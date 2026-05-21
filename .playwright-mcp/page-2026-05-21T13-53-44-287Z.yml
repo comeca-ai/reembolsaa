@@ -1,0 +1,104 @@
+- generic [ref=e7]:
+  - complementary [ref=e8]:
+    - generic [ref=e10]:
+      - generic [ref=e12]: R$
+      - generic [ref=e13]: Reembolsaaí
+    - navigation [ref=e14]:
+      - link "Dashboard" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e16]
+        - generic [ref=e21]: Dashboard
+      - link "Nova Despesa" [ref=e22] [cursor=pointer]:
+        - /url: /nova-despesa
+        - img [ref=e23]
+        - generic [ref=e25]: Nova Despesa
+        - img [ref=e26]
+      - link "Aprovações" [ref=e28] [cursor=pointer]:
+        - /url: /aprovacoes
+        - img [ref=e29]
+        - generic [ref=e32]: Aprovações
+      - link "Relatórios" [ref=e33] [cursor=pointer]:
+        - /url: /relatorios
+        - img [ref=e34]
+        - generic [ref=e36]: Relatórios
+      - link "Financeiro" [ref=e37] [cursor=pointer]:
+        - /url: /financeiro
+        - img [ref=e38]
+        - generic [ref=e41]: Financeiro
+      - link "Política" [ref=e42] [cursor=pointer]:
+        - /url: /politica
+        - img [ref=e43]
+        - generic [ref=e45]: Política
+      - link "Usuários" [ref=e46] [cursor=pointer]:
+        - /url: /usuarios
+        - img [ref=e47]
+        - generic [ref=e52]: Usuários
+      - link "Configurações" [ref=e53] [cursor=pointer]:
+        - /url: /configuracoes
+        - img [ref=e54]
+        - generic [ref=e57]: Configurações
+    - generic [ref=e58]:
+      - paragraph [ref=e59]: OCR Despesas SA
+      - generic [ref=e60]:
+        - generic [ref=e62]: JO
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Joao OCR
+          - paragraph [ref=e65]: despesa-ocr-test@empresa-demo.com
+        - button "Sair" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+  - main [ref=e70]:
+    - generic [ref=e72]:
+      - link "Voltar" [ref=e73] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e74]
+        - text: Voltar
+      - generic [ref=e77]:
+        - img [ref=e79]
+        - generic [ref=e81]:
+          - heading "Nova despesa" [level=1] [ref=e82]
+          - paragraph [ref=e83]: Suba a foto do comprovante — a IA preenche os campos.
+      - generic [ref=e85]:
+        - img "comprovante" [ref=e114]
+        - generic [ref=e91]:
+          - paragraph [ref=e92]: receipt.png
+          - paragraph [ref=e93]: Campos preenchidos — confira abaixo.
+        - button [ref=e115] [cursor=pointer]:
+          - img [ref=e116]
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e96]:
+            - text: Colaborador
+            - textbox "Colaborador" [ref=e97]:
+              - /placeholder: Seu nome
+              - text: Joao OCR
+          - generic [ref=e98]:
+            - text: Centro de custo
+            - textbox "Centro de custo" [ref=e99]:
+              - /placeholder: "Ex.: Comercial"
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - text: Categoria
+            - combobox [ref=e102] [cursor=pointer]:
+              - generic: Alimentação
+              - img [ref=e103]
+            - combobox [ref=e105]
+            - paragraph [ref=e106]: "Limite da política: R$ 80,00"
+          - generic [ref=e107]:
+            - text: Valor (R$)
+            - spinbutton "Valor (R$)" [ref=e108]: "74.5"
+        - generic [ref=e109]:
+          - text: Data
+          - textbox "Data" [ref=e110]: 2026-05-15
+        - generic [ref=e111]:
+          - text: Observação
+          - textbox "Observação" [ref=e112]:
+            - /placeholder: Detalhes do gasto...
+            - text: Almoço e suco — RESTAURANTE CENTRAL LTDA
+        - generic [ref=e119]:
+          - img [ref=e120]
+          - generic [ref=e123]:
+            - paragraph [ref=e124]: Dentro da política — aprovação automática
+            - paragraph [ref=e125]: Dentro do limite de R$ 80,00 para Alimentação.
+        - button "Lançar despesa" [ref=e113] [cursor=pointer]:
+          - img
+          - text: Lançar despesa

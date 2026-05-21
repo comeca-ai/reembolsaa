@@ -1,10 +1,9 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppShell from './components/layout/AppShell';
 import DashboardPage from './pages/DashboardPage';
 import PolicyPage from './pages/PolicyPage';
@@ -14,42 +13,73 @@ import FinancialPage from './pages/FinancialPage';
 import NewExpensePage from './pages/NewExpensePage';
 import LandingPage from './pages/LandingPage';
 import OnboardingPage from './pages/OnboardingPage';
-import WebhookTest from './pages/WebhookTest';
+import PolicyOnboardingPage from './pages/PolicyOnboardingPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 import ApprovalPage from './pages/ApprovalPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
-// Add page imports here
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+const FullScreenLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+  </div>
+);
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+// Rota apenas para visitantes (já logado é redirecionado para dentro do app).
+const PublicOnly = ({ children }) => {
+  const { isAuthenticated, hasEmpresa } = useAuth();
+  if (isAuthenticated) return <Navigate to={hasEmpresa ? "/dashboard" : "/comecar"} replace />;
+  return children;
+};
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
-  }
+// Exige sessão. Sem sessão -> login.
+const RequireAuth = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location }} />;
+  return children;
+};
 
-  // Render the main app
+// Passo 2 do onboarding (subir política). Exige sessão + empresa; admins que
+// ainda não concluíram. Quem já concluiu (ou não é admin) vai pro dashboard.
+const PolicyOnboardingRoute = () => {
+  const { isAuthenticated, hasEmpresa, needsPolicyOnboarding } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!hasEmpresa) return <Navigate to="/comecar" replace />;
+  if (!needsPolicyOnboarding) return <Navigate to="/dashboard" replace />;
+  return <PolicyOnboardingPage />;
+};
+
+// Layout protegido: exige sessão + empresa. Sem empresa -> onboarding;
+// admin sem política configurada -> tela de subir política.
+const ProtectedLayout = () => {
+  const { isAuthenticated, hasEmpresa, needsPolicyOnboarding } = useAuth();
+  const location = useLocation();
+  if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!hasEmpresa) return <Navigate to="/comecar" replace />;
+  if (needsPolicyOnboarding) return <Navigate to="/comecar/politica" replace />;
+  return <AppShell />;
+};
+
+const AppRoutes = () => {
+  const { loading } = useAuth();
+  if (loading) return <FullScreenLoader />;
+
   return (
     <Routes>
-      <Route path="/landing" element={<LandingPage />} />
-      <Route path="/comecar" element={<OnboardingPage />} />
-      <Route path="/webhook-test" element={<WebhookTest />} />
-      <Route element={<AppShell />}>
+      {/* Público */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
+      <Route path="/cadastro" element={<PublicOnly><SignupPage /></PublicOnly>} />
+
+      {/* Autenticado, ainda sem empresa */}
+      <Route path="/comecar" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
+      {/* Primeiro acesso do admin: subir política */}
+      <Route path="/comecar/politica" element={<PolicyOnboardingRoute />} />
+
+      {/* App protegido (sessão + empresa) */}
+      <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
@@ -60,27 +90,23 @@ const AuthenticatedApp = () => {
         <Route path="/relatorios" element={<ReportsPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
       </Route>
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<AuthenticatedApp />} />
-          </Routes>
+          <AppRoutes />
         </Router>
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
-  )
+  );
 }
 
 export default App

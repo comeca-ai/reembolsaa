@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Paperclip, MessageSquare, FileText, X, Loader2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { CURRENT_USER } from "@/lib/mockData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -24,7 +23,8 @@ export default function ViolationChat({ expenseId }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    // Pré-visualização local do anexo (upload real de comprovante: feature em breve).
+    const file_url = URL.createObjectURL(file);
     setAttachedFile({ name: file.name, url: file_url });
     setUploading(false);
   };

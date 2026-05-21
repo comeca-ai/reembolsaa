@@ -1,0 +1,21 @@
+- generic [ref=e26]:
+  - generic [ref=e27]:
+    - generic [ref=e29]: R$
+    - generic [ref=e30]: Reembolsaaí
+  - generic [ref=e31]:
+    - generic [ref=e32]:
+      - img [ref=e34]
+      - heading "Crie sua empresa" [level=1] [ref=e38]
+      - paragraph [ref=e39]: Olá, Teste Fluxo! Dê um nome à sua empresa para começar. Você será o administrador e poderá convidar a equipe depois.
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - text: Nome da empresa
+        - textbox "Nome da empresa" [active] [ref=e42]:
+          - /placeholder: Acme Ltda
+      - button "Criar empresa e entrar" [ref=e43] [cursor=pointer]:
+        - text: Criar empresa e entrar
+        - img
+    - generic [ref=e44]:
+      - img [ref=e45]
+      - generic [ref=e48]: Cada empresa tem dados isolados por Row-Level Security no Supabase.
+    - button "Sair" [ref=e49] [cursor=pointer]

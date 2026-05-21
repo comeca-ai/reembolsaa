@@ -1,0 +1,61 @@
+- generic [ref=e84]:
+  - complementary [ref=e85]:
+    - generic [ref=e87]:
+      - generic [ref=e89]: R$
+      - generic [ref=e90]: Reembolsaaí
+    - navigation [ref=e91]:
+      - link "Dashboard" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e93]
+        - generic [ref=e98]: Dashboard
+        - img [ref=e99]
+      - link "Nova Despesa" [ref=e101] [cursor=pointer]:
+        - /url: /nova-despesa
+        - img [ref=e102]
+        - generic [ref=e104]: Nova Despesa
+      - link "Aprovações" [ref=e105] [cursor=pointer]:
+        - /url: /aprovacoes
+        - img [ref=e106]
+        - generic [ref=e109]: Aprovações
+      - link "Relatórios" [ref=e110] [cursor=pointer]:
+        - /url: /relatorios
+        - img [ref=e111]
+        - generic [ref=e113]: Relatórios
+      - link "Financeiro" [ref=e114] [cursor=pointer]:
+        - /url: /financeiro
+        - img [ref=e115]
+        - generic [ref=e118]: Financeiro
+      - link "Política" [ref=e119] [cursor=pointer]:
+        - /url: /politica
+        - img [ref=e120]
+        - generic [ref=e122]: Política
+      - link "Usuários" [ref=e123] [cursor=pointer]:
+        - /url: /usuarios
+        - img [ref=e124]
+        - generic [ref=e129]: Usuários
+      - link "Configurações" [ref=e130] [cursor=pointer]:
+        - /url: /configuracoes
+        - img [ref=e131]
+        - generic [ref=e134]: Configurações
+    - generic [ref=e135]:
+      - paragraph [ref=e136]: OCR Despesas SA
+      - generic [ref=e137]:
+        - generic [ref=e139]: JO
+        - generic [ref=e140]:
+          - paragraph [ref=e141]: Joao OCR
+          - paragraph [ref=e142]: despesa-ocr-test@empresa-demo.com
+        - button "Sair" [ref=e143] [cursor=pointer]:
+          - img [ref=e144]
+  - main [ref=e147]:
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - generic [ref=e151]:
+          - img [ref=e153]
+          - heading "Dashboard de Compliance" [level=1] [ref=e158]
+        - paragraph [ref=e159]: Visão em tempo real do score de compliance, distribuição de despesas e alertas de violação de política.
+      - generic [ref=e160]:
+        - img [ref=e161]
+        - heading "Nenhuma despesa ainda" [level=3] [ref=e164]
+        - paragraph [ref=e165]: Lance a primeira despesa da sua empresa para ver os indicadores.
+        - link "Lançar despesa" [ref=e166] [cursor=pointer]:
+          - /url: /nova-despesa
