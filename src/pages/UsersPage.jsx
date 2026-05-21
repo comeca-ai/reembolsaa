@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Users, UserPlus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Users, UserPlus, Search, SlidersHorizontal, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,7 @@ import UsersStatsBar from "@/components/users/UsersStatsBar";
 import UsersTable from "@/components/users/UsersTable";
 import InviteModal from "@/components/users/InviteModal";
 import EditRoleModal from "@/components/users/EditRoleModal";
+import ImportUsersModal from "@/components/users/ImportUsersModal";
 
 const STATUS_OPTIONS = [
   { value: "all",      label: "Todos os status" },
@@ -29,6 +30,7 @@ export default function UsersPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterRole, setFilterRole]     = useState("all");
   const [inviteOpen, setInviteOpen]     = useState(false);
+  const [importOpen, setImportOpen]     = useState(false);
   const [editUser, setEditUser]         = useState(null);
 
   const filtered = useMemo(() => {
@@ -86,6 +88,24 @@ export default function UsersPage() {
     toast.success(`Convite reenviado para ${user.email}.`);
   };
 
+  const handleImport = (rows) => {
+    const newUsers = rows.map((r, idx) => ({
+      id: `u-imp-${Date.now()}-${idx}`,
+      name: r.nome,
+      email: r.email,
+      role: r.papel,
+      status: "pending",
+      department: r.setor || "",
+      invited_at: new Date().toISOString(),
+      joined_at: null,
+      avatar: r.nome.slice(0, 2).toUpperCase(),
+      last_expense: null,
+      expenses_count: 0,
+    }));
+    setUsers((prev) => [...newUsers, ...prev]);
+    toast.success(`${rows.length} usuário${rows.length !== 1 ? "s" : ""} importado${rows.length !== 1 ? "s" : ""}!`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
@@ -112,13 +132,23 @@ export default function UsersPage() {
               </p>
             </div>
 
-            <Button
-              onClick={() => setInviteOpen(true)}
-              className="font-semibold text-sm gap-2 shrink-0 mt-1"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span className="hidden sm:inline">Convidar</span>
-            </Button>
+            <div className="flex gap-2 shrink-0 mt-1">
+              <Button
+                variant="outline"
+                onClick={() => setImportOpen(true)}
+                className="font-semibold text-sm gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                <span className="hidden sm:inline">Importar CSV</span>
+              </Button>
+              <Button
+                onClick={() => setInviteOpen(true)}
+                className="font-semibold text-sm gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span className="hidden sm:inline">Convidar</span>
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -224,6 +254,11 @@ export default function UsersPage() {
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
         onInvite={handleInvite}
+      />
+      <ImportUsersModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImport}
       />
       <EditRoleModal
         open={!!editUser}
