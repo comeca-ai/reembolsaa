@@ -1,12 +1,13 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle, CheckCircle2 } from "lucide-react";
+import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle, CheckCircle2, BarChart3 } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mockData";
 
 const NAV_ITEMS = [
   { path: "/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
   { path: "/nova-despesa", label: "Nova Despesa", icon: PlusCircle },
   { path: "/aprovacoes",   label: "Aprovações",   icon: CheckCircle2 },
+  { path: "/relatorios",   label: "Relatórios",   icon: BarChart3 },
   { path: "/financeiro",   label: "Financeiro",   icon: TrendingUp },
   { path: "/politica",     label: "Política",     icon: Shield },
   { path: "/usuarios",     label: "Usuários",     icon: Users },
