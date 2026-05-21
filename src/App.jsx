@@ -12,6 +12,7 @@ import UsersPage from './pages/UsersPage';
 import ViolationDetailPage from './pages/ViolationDetailPage';
 import FinancialPage from './pages/FinancialPage';
 import NewExpensePage from './pages/NewExpensePage';
+import LandingPage from './pages/LandingPage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -40,6 +41,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/landing" element={<LandingPage />} />
       <Route element={<AppShell />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
