@@ -1,140 +1,150 @@
 // ─── Dashboard / Compliance mock data ────────────────────────────
-// Maps to future Supabase views / edge functions.
+// Designed to map to future Supabase views/queries.
 
-export const EXPENSE_BY_CATEGORY = [
-  { category: "Alimentação",          total: 18420, count: 230, limit: 80,   unit: "/refeição" },
-  { category: "Transporte",           total: 14200, count: 71,  limit: 200,  unit: "/dia" },
-  { category: "Hospedagem",           total: 26100, count: 58,  limit: 450,  unit: "/diária" },
-  { category: "Combustível",          total: 6840,  count: 95,  limit: 1.20, unit: "/km" },
-  { category: "Representação",        total: 12300, count: 35,  limit: 350,  unit: "/refeição" },
-  { category: "Treinamento",          total: 9800,  count: 12,  limit: 3000, unit: "" },
-  { category: "Software e licenças",  total: 5200,  count: 22,  limit: 150,  unit: "/dia" },
-  { category: "Eventos corporativos", total: 7600,  count: 8,   limit: 5000, unit: "" },
-  { category: "Passagem aérea",       total: 21500, count: 18,  limit: 2500, unit: "" },
-  { category: "Material de obra",     total: 33800, count: 44,  limit: null, unit: "" },
+export const KPI_DATA = {
+  total_submitted:    { value: 312,        delta: +18,    label: "Despesas submetidas",    unit: "este mês" },
+  total_amount:       { value: 148_720,    delta: +9.4,   label: "Volume total",           unit: "R$" },
+  approved_rate:      { value: 76.4,       delta: -2.1,   label: "Taxa de aprovação",      unit: "%" },
+  violations:         { value: 34,         delta: +7,     label: "Alertas de violação",    unit: "este mês" },
+  avg_processing:     { value: 2.3,        delta: -0.4,   label: "Tempo médio de análise", unit: "dias" },
+  pending_review:     { value: 41,         delta: +12,    label: "Aguardando revisão",     unit: "despesas" },
+};
+
+// ─── Expenses by category (donut) ───────────────────────────────
+export const EXPENSES_BY_CATEGORY = [
+  { name: "Alimentação",          value: 28_400, count: 94 },
+  { name: "Transporte",           value: 22_100, count: 71 },
+  { name: "Hospedagem",           value: 38_600, count: 24 },
+  { name: "Passagem aérea",       value: 21_300, count: 11 },
+  { name: "Representação",        value: 14_800, count: 18 },
+  { name: "Treinamento",          value: 9_200,  count: 7  },
+  { name: "Combustível",          value: 7_320,  count: 63 },
+  { name: "Outros",               value: 7_000,  count: 24 },
 ];
 
-export const REIMBURSEMENT_BY_DEPT = [
-  { department: "Obras",          approved: 42300, pending: 8200, rejected: 3100 },
-  { department: "Comercial",      approved: 27400, pending: 5600, rejected: 1800 },
-  { department: "Administrativo", approved: 15200, pending: 2100, rejected: 600  },
-  { department: "Financeiro",     approved: 9800,  pending: 1400, rejected: 400  },
-  { department: "TI",             approved: 7300,  pending: 1100, rejected: 200  },
-  { department: "RH",             approved: 4200,  pending: 600,  rejected: 100  },
+// ─── Volume by department (horizontal bar) ──────────────────────
+export const VOLUME_BY_DEPARTMENT = [
+  { department: "Obras",         total: 54_200, approved: 41_000, rejected: 6_800,  pending: 6_400  },
+  { department: "Comercial",     total: 38_700, approved: 31_200, rejected: 3_100,  pending: 4_400  },
+  { department: "Financeiro",    total: 22_400, approved: 19_800, rejected: 1_200,  pending: 1_400  },
+  { department: "Administrativo",total: 16_800, approved: 13_400, rejected: 1_800,  pending: 1_600  },
+  { department: "TI",            total: 10_320, approved: 8_900,  rejected: 820,    pending: 600    },
+  { department: "RH",            total: 6_300,  approved: 5_200,  rejected: 600,    pending: 500    },
 ];
 
-export const MONTHLY_VOLUME = [
-  { month: "Dez/25", total: 38200, violations: 12 },
-  { month: "Jan/26", total: 44100, violations: 9  },
-  { month: "Fev/26", total: 39800, violations: 14 },
-  { month: "Mar/26", total: 51200, violations: 7  },
-  { month: "Abr/26", total: 47600, violations: 11 },
-  { month: "Mai/26", total: 34900, violations: 5  },
+// ─── Compliance score over time (area chart) ────────────────────
+export const COMPLIANCE_TREND = [
+  { month: "Dez/25", score: 71 },
+  { month: "Jan/26", score: 74 },
+  { month: "Fev/26", score: 69 },
+  { month: "Mar/26", score: 78 },
+  { month: "Abr/26", score: 82 },
+  { month: "Mai/26", score: 76 },
 ];
 
-export const POLICY_VIOLATIONS = [
+// ─── Violation alerts ────────────────────────────────────────────
+// type: "over_limit" | "missing_docs" | "no_approval" | "duplicate"
+export const VIOLATION_ALERTS = [
   {
     id: "v-01",
+    type: "over_limit",
     severity: "high",
-    type: "above_limit",
-    employee: "Rafael Souza",
+    employee: "Carlos Almeida",
     department: "Obras",
     category: "Hospedagem",
-    amount: 680,
+    amount: 820,
     limit: 450,
-    excess: 230,
-    date: "2026-05-19",
-    description: "Despesa R$ 230 acima do limite de R$ 450/diária",
+    date: "2026-05-20",
+    description: "Despesa 143% acima do limite de R$ 450/diária",
   },
   {
     id: "v-02",
-    severity: "high",
     type: "missing_docs",
-    employee: "Carlos Almeida",
+    severity: "high",
+    employee: "Rafael Souza",
     department: "Obras",
-    category: "Representação",
-    amount: 820,
-    limit: 350,
-    excess: 470,
-    date: "2026-05-18",
-    description: "Nota fiscal ausente · excede limite em R$ 470",
+    category: "Alimentação",
+    amount: 240,
+    limit: null,
+    date: "2026-05-20",
+    description: "Nota fiscal ausente (3 lançamentos)",
   },
   {
     id: "v-03",
+    type: "over_limit",
     severity: "medium",
-    type: "missing_docs",
     employee: "Fernanda Lima",
     department: "Comercial",
-    category: "Alimentação",
-    amount: 95,
-    limit: 80,
-    excess: 15,
-    date: "2026-05-18",
-    description: "Nota fiscal ausente",
+    category: "Representação",
+    amount: 520,
+    limit: 350,
+    date: "2026-05-19",
+    description: "Despesa 49% acima do limite de R$ 350/refeição",
   },
   {
     id: "v-04",
+    type: "no_approval",
     severity: "medium",
-    type: "above_limit",
     employee: "Bruno Mendes",
     department: "TI",
     category: "Software e licenças",
-    amount: 210,
-    limit: 150,
-    excess: 60,
-    date: "2026-05-17",
-    description: "Despesa R$ 60 acima do limite diário",
+    amount: 890,
+    limit: null,
+    date: "2026-05-18",
+    description: "Compra sem aprovação prévia do gestor",
   },
   {
     id: "v-05",
+    type: "missing_docs",
     severity: "medium",
-    type: "no_approval",
     employee: "Tatiane Rocha",
     department: "Administrativo",
-    category: "Hospedagem",
-    amount: 1350,
-    limit: 450,
-    excess: null,
-    date: "2026-05-16",
-    description: "3 diárias sem pré-aprovação registrada",
+    category: "Transporte",
+    amount: 310,
+    limit: null,
+    date: "2026-05-17",
+    description: "Recibo do app ausente",
   },
   {
     id: "v-06",
+    type: "duplicate",
     severity: "low",
-    type: "above_limit",
-    employee: "Fernanda Lima",
-    department: "Comercial",
-    category: "Transporte",
-    amount: 245,
-    limit: 200,
-    excess: 45,
-    date: "2026-05-15",
-    description: "Despesa R$ 45 acima do limite diário",
+    employee: "Mariana Costa",
+    department: "Financeiro",
+    category: "Alimentação",
+    amount: 75,
+    limit: null,
+    date: "2026-05-16",
+    description: "Possível duplicidade — mesma nota, mesmo valor, mesmo dia",
   },
   {
     id: "v-07",
+    type: "over_limit",
     severity: "low",
-    type: "missing_docs",
-    employee: "Rafael Souza",
+    employee: "Carlos Almeida",
     department: "Obras",
     category: "Combustível",
-    amount: 186,
+    amount: 180,
     limit: null,
-    excess: null,
-    date: "2026-05-14",
-    description: "Registro de odômetro ausente",
+    date: "2026-05-15",
+    description: "Rota não validada por GPS",
   },
 ];
 
-export const COMPLIANCE_SCORE = 84; // 0–100
-
-export const KPI_SUMMARY = {
-  total_submitted:  312,
-  total_approved:   271,
-  total_pending:    28,
-  total_rejected:   13,
-  total_amount:     155760,
-  avg_per_employee: 3680,
-  violations_open:  7,
-  violations_30d:   58,
+export const VIOLATION_TYPE_LABELS = {
+  over_limit:   "Acima do limite",
+  missing_docs: "Doc. ausente",
+  no_approval:  "Sem aprovação",
+  duplicate:    "Duplicidade",
 };
+
+export const CHART_COLORS = [
+  "#C8F55A", // lime  (primary)
+  "#F2C14A", // amber (warning)
+  "#FF7065", // red   (destructive)
+  "#60C4F4", // blue
+  "#A78BFA", // violet
+  "#34D399", // emerald
+  "#FB923C", // orange
+  "#9A9A93", // muted
+];
