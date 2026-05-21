@@ -1,10 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ROLE_LABELS, DEPARTMENT_OPTIONS } from "@/lib/mockData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield, CheckCircle2, User } from "lucide-react";
+import { DEPARTMENT_OPTIONS } from "@/lib/mockData";
 import UserAvatar from "./UserAvatar";
+
+const ROLES = [
+  {
+    value: "admin",
+    label: "Administrador",
+    icon: Shield,
+    color: "text-primary",
+    bg: "bg-primary/10 border-primary/30",
+    desc: "Acesso total: gerencia usuários, política, relatórios e financeiro.",
+  },
+  {
+    value: "approver",
+    label: "Aprovador",
+    icon: CheckCircle2,
+    color: "text-warning",
+    bg: "bg-warning/10 border-warning/30",
+    desc: "Visualiza e aprova despesas enviadas pelos colaboradores.",
+  },
+  {
+    value: "employee",
+    label: "Colaborador",
+    icon: User,
+    color: "text-muted-foreground",
+    bg: "bg-secondary border-border",
+    desc: "Envia despesas para aprovação e acompanha o próprio histórico.",
+  },
+];
 
 export default function EditRoleModal({ open, user, onClose, onSave }) {
   const [role, setRole] = useState(user?.role ?? "employee");
@@ -41,22 +69,24 @@ export default function EditRoleModal({ open, user, onClose, onSave }) {
 
         <div className="space-y-4 pt-2">
           <div>
-            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Papel</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger className="mt-1.5 bg-secondary border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {Object.entries(ROLE_LABELS).map(([val, lbl]) => (
-                  <SelectItem key={val} value={val}>{lbl}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              {role === "admin" && "Acesso total: gerencia usuários, política e aprova todas as despesas."}
-              {role === "manager" && "Aprova despesas do seu departamento e visualiza relatórios da equipe."}
-              {role === "employee" && "Submete despesas para aprovação e acompanha o próprio histórico."}
-            </p>
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">Nível de acesso</Label>
+            <div className="space-y-2">
+              {ROLES.map(({ value, label, icon: Icon, color, bg, desc }) => (
+                <button
+                  key={value}
+                  onClick={() => setRole(value)}
+                  className={`w-full flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
+                    role === value ? bg : "border-border bg-secondary/40 hover:bg-secondary"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${role === value ? color : "text-muted-foreground"}`} />
+                  <div>
+                    <p className={`text-sm font-medium ${role === value ? color : "text-foreground"}`}>{label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

@@ -196,7 +196,7 @@ export const MOCK_USERS = [
     id: "u-002",
     name: "Carlos Almeida",
     email: "carlos@construtecbr.com.br",
-    role: "manager",
+    role: "approver",
     status: "active",
     department: "Obras",
     invited_at: "2024-02-10T10:00:00Z",
@@ -235,7 +235,7 @@ export const MOCK_USERS = [
     id: "u-005",
     name: "Tatiane Rocha",
     email: "tatiane@construtecbr.com.br",
-    role: "manager",
+    role: "approver",
     status: "active",
     department: "Administrativo",
     invited_at: "2024-05-20T09:00:00Z",
@@ -300,7 +300,7 @@ export const MOCK_USERS = [
 
 export const ROLE_LABELS = {
   admin: "Administrador",
-  manager: "Gestor",
+  approver: "Aprovador",
   employee: "Colaborador",
 };
 

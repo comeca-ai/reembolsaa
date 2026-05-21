@@ -4,7 +4,7 @@ import { ROLE_LABELS } from "@/lib/mockData";
 
 const ROLE_STYLES = {
   admin: "border-primary/30 text-primary bg-primary/8",
-  manager: "border-warning/30 text-warning bg-warning/8",
+  approver: "border-warning/30 text-warning bg-warning/8",
   employee: "border-border text-muted-foreground bg-secondary",
 };
 
