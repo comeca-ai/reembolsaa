@@ -15,6 +15,7 @@ export default function OnboardingPage() {
 
   // Step 1 state
   const [form, setForm] = useState({ name: "", company: "", email: "", password: "" });
+  const [errors, setErrors] = useState({});
 
   // Step 2 state
   const [file, setFile] = useState(null);
@@ -23,7 +24,18 @@ export default function OnboardingPage() {
 
   const handleCadastro = (e) => {
     e.preventDefault();
-    setStep(1);
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = "Nome obrigatório";
+    if (!form.company.trim()) newErrors.company = "Empresa obrigatória";
+    if (!form.email.trim()) newErrors.email = "E-mail obrigatório";
+    if (form.password.length < 8) newErrors.password = "Mínimo 8 caracteres";
+    
+    if (Object.keys(newErrors).length === 0) {
+      setErrors({});
+      setStep(1);
+    } else {
+      setErrors(newErrors);
+    }
   };
 
   const handleFileDrop = (e) => {
@@ -97,27 +109,31 @@ export default function OnboardingPage() {
             >
               <div>
                 <h1 className="font-heading text-2xl text-foreground mb-1">Crie sua conta</h1>
-                <p className="text-muted-foreground text-sm">14 dias grátis. Sem cartão de crédito.</p>
+                <p className="text-muted-foreground text-sm">Acesso imediato ao dashboard.</p>
               </div>
 
               <form onSubmit={handleCadastro} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="name">Nome</Label>
-                    <Input id="name" placeholder="João Silva" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                    <Label htmlFor="name" className={errors.name ? "text-destructive" : ""}>Nome</Label>
+                    <Input id="name" placeholder="João Silva" value={form.name} onChange={e => { setForm({ ...form, name: e.target.value }); if (errors.name) setErrors({ ...errors, name: "" }); }} className={errors.name ? "border-destructive/50 focus-visible:ring-destructive/30" : ""} />
+                    {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="company">Empresa</Label>
-                    <Input id="company" placeholder="Acme Ltda" required value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
+                    <Label htmlFor="company" className={errors.company ? "text-destructive" : ""}>Empresa</Label>
+                    <Input id="company" placeholder="Acme Ltda" value={form.company} onChange={e => { setForm({ ...form, company: e.target.value }); if (errors.company) setErrors({ ...errors, company: "" }); }} className={errors.company ? "border-destructive/50 focus-visible:ring-destructive/30" : ""} />
+                    {errors.company && <p className="text-destructive text-xs mt-1">{errors.company}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="email">E-mail corporativo</Label>
-                  <Input id="email" type="email" placeholder="joao@empresa.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                  <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>E-mail corporativo</Label>
+                  <Input id="email" type="email" placeholder="joao@empresa.com" value={form.email} onChange={e => { setForm({ ...form, email: e.target.value }); if (errors.email) setErrors({ ...errors, email: "" }); }} className={errors.email ? "border-destructive/50 focus-visible:ring-destructive/30" : ""} />
+                  {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input id="password" type="password" placeholder="Mínimo 8 caracteres" required minLength={8} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+                  <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>Senha</Label>
+                  <Input id="password" type="password" placeholder="Mínimo 8 caracteres" value={form.password} onChange={e => { setForm({ ...form, password: e.target.value }); if (errors.password) setErrors({ ...errors, password: "" }); }} className={errors.password ? "border-destructive/50 focus-visible:ring-destructive/30" : ""} />
+                  {errors.password && <p className="text-destructive text-xs mt-1">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full h-11 text-base mt-2">
                   Continuar
@@ -144,13 +160,13 @@ export default function OnboardingPage() {
               className="bg-card border border-border rounded-2xl p-8 space-y-6"
             >
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-primary text-xs font-medium">IA vai ler e estruturar automaticamente</span>
+                  <span className="text-primary text-xs font-semibold">Próximo passo</span>
                 </div>
-                <h1 className="font-heading text-2xl text-foreground mb-1">Suba sua política</h1>
-                <p className="text-muted-foreground text-sm">
-                  PDF da política de reembolso da empresa. A IA converte em regras em segundos.
+                <h1 className="font-heading text-2xl text-foreground mb-2">Configure sua política</h1>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Suba o PDF da política de reembolso. Nossa IA lê e transforma em regras automáticas que serão aplicadas a cada despesa.
                 </p>
               </div>
 
@@ -196,14 +212,16 @@ export default function OnboardingPage() {
 
               <div className="space-y-3">
                 <Button onClick={handleFinish} disabled={uploading} className="w-full h-11 text-base">
-                  {uploading ? "Enviando..." : file ? "Continuar para o dashboard" : "Pular por agora"}
+                  {uploading ? "Processando..." : file ? "Processar e continuar" : "Ir para dashboard"}
                   {!uploading && <ArrowRight className="w-4 h-4" />}
                 </Button>
-                {!file && (
-                  <p className="text-center text-xs text-muted-foreground">
-                    Você pode subir a política depois em <span className="text-foreground font-medium">Configurações → Política</span>
-                  </p>
-                )}
+                <p className="text-center text-xs text-muted-foreground">
+                  {file ? (
+                    <>Nossa IA analisará a política e criará as regras automaticamente</>
+                  ) : (
+                    <>Você pode adicionar a política depois no dashboard</>
+                  )}
+                </p>
               </div>
             </motion.div>
           )}
