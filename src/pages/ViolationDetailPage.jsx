@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, AlertTriangle, FileX, ShieldOff, Copy, Calendar, Building2, DollarSign, Tag } from "lucide-react";
+import { ArrowLeft, AlertTriangle, FileX, ShieldOff, Copy, Calendar, Building2, DollarSign, Tag, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,6 +13,7 @@ import { MOCK_INVOICES, APPROVAL_HISTORY_BY_CATEGORY, ACTION_SUGGESTIONS } from 
 import InvoicePanel from "@/components/violation/InvoicePanel";
 import ApprovalHistoryPanel from "@/components/violation/ApprovalHistoryPanel";
 import ActionSuggestionPanel from "@/components/violation/ActionSuggestionPanel";
+import QuickApprovalModal from "@/components/violation/QuickApprovalModal";
 
 const TYPE_ICONS = {
   over_limit:   AlertTriangle,
@@ -28,6 +30,8 @@ const SEVERITY_STYLES = {
 
 export default function ViolationDetailPage() {
   const { id } = useParams();
+
+  const [approvalModalOpen, setApprovalModalOpen] = useState(false);
 
   const alert = VIOLATION_ALERTS.find((v) => v.id === id);
 
@@ -123,10 +127,20 @@ export default function ViolationDetailPage() {
                 )}
               </div>
 
-              {/* Alert ID */}
-              <span className="text-[11px] font-mono text-muted-foreground shrink-0 bg-secondary px-2 py-1 rounded-md self-start">
-                #{alert.id}
-              </span>
+              {/* Alert ID + Approve button */}
+              <div className="flex flex-col items-end gap-2 shrink-0 self-start">
+                <span className="text-[11px] font-mono text-muted-foreground bg-secondary px-2 py-1 rounded-md">
+                  #{alert.id}
+                </span>
+                <Button
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => setApprovalModalOpen(true)}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Aprovar despesa
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -159,6 +173,12 @@ export default function ViolationDetailPage() {
         </div>
 
       </div>
+
+      <QuickApprovalModal
+        open={approvalModalOpen}
+        onClose={() => setApprovalModalOpen(false)}
+        alert={alert}
+      />
     </div>
   );
 }
