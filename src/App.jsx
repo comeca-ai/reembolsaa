@@ -11,6 +11,7 @@ import PolicyPage from './pages/PolicyPage';
 import UsersPage from './pages/UsersPage';
 import ViolationDetailPage from './pages/ViolationDetailPage';
 import FinancialPage from './pages/FinancialPage';
+import NewExpensePage from './pages/NewExpensePage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
         <Route path="/usuarios" element={<UsersPage />} />
         <Route path="/alertas/:id" element={<ViolationDetailPage />} />
         <Route path="/financeiro" element={<FinancialPage />} />
+        <Route path="/nova-despesa" element={<NewExpensePage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
