@@ -13,12 +13,13 @@ export default function WebhookTest() {
     setResponse(null);
     const res = await fetch(WEBHOOK, {
       method: "POST",
+      mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ file_url: FILE_URL, file_name: FILE_NAME }),
     });
-    const text = await res.text();
-    setResponse(text);
-    setStatus(res.ok ? "success" : "error");
+    // no-cors returns opaque response, assume success if no error thrown
+    setResponse("Enviado (no-cors — resposta opaca). Verifique no n8n.");
+    setStatus("success");
   };
 
   useEffect(() => {
