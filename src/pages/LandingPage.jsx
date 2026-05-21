@@ -212,7 +212,7 @@ function Hero() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Agente IA · Reembolsaaí</p>
-                <p className="text-sm font-medium text-foreground">Veredito de compliance</p>
+                <p className="text-sm font-medium text-foreground">Resultado da análise</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-full">
                 <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
@@ -234,7 +234,7 @@ function Hero() {
             </div>
             <div className="bg-primary/8 border border-primary/20 rounded-lg px-3 py-2.5">
               <p className="text-xs text-primary">
-                ✓ Dentro do limite de R$ 80/refeição · Nota fiscal válida · Aprovado automaticamente
+                ✓ Dentro do limite de R$ 80/refeição · Nota validada · Aprovada automaticamente
               </p>
             </div>
           </div>
