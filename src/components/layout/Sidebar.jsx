@@ -8,10 +8,10 @@ const NAV_ITEMS = [
   { path: "/nova-despesa", label: "Nova Despesa", icon: PlusCircle },
   { path: "/aprovacoes",   label: "Aprovações",   icon: CheckCircle2 },
   { path: "/relatorios",   label: "Relatórios",   icon: BarChart3 },
-  { path: "/configuracoes",label: "Configurações", icon: Settings },
   { path: "/financeiro",   label: "Financeiro",   icon: TrendingUp },
   { path: "/politica",     label: "Política",     icon: Shield },
   { path: "/usuarios",     label: "Usuários",     icon: Users },
+  { path: "/configuracoes",label: "Configurações", icon: Settings },
 ];
 
 export default function Sidebar() {
