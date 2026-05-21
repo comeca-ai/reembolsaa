@@ -7,6 +7,7 @@ import { VIOLATION_TYPE_LABELS } from "@/lib/dashboardMockData";
 import UserAvatar from "@/components/users/UserAvatar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Link } from "react-router-dom";
 
 const TYPE_ICONS = {
   over_limit:   AlertTriangle,
@@ -91,52 +92,57 @@ export default function ViolationAlerts({ alerts }) {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
-                className="px-5 py-3.5 flex items-start gap-4 hover:bg-secondary/20 transition-colors group cursor-pointer"
               >
-                {/* Icon */}
-                <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${
-                  alert.severity === "high" ? "bg-destructive/10" :
-                  alert.severity === "medium" ? "bg-warning/10" : "bg-secondary"
-                }`}>
-                  <Icon className={`w-3.5 h-3.5 ${
-                    alert.severity === "high" ? "text-destructive" :
-                    alert.severity === "medium" ? "text-warning" : "text-muted-foreground"
-                  }`} />
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                    <span className="text-foreground text-sm font-medium">{alert.employee}</span>
-                    <span className="text-muted-foreground text-xs">·</span>
-                    <span className="text-muted-foreground text-xs">{alert.department}</span>
-                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sev.badge}`}>
-                      {VIOLATION_TYPE_LABELS[alert.type]}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground text-xs leading-relaxed truncate">
-                    {alert.description}
-                    {alert.amount && (
-                      <span className="text-foreground font-mono ml-1">
-                        — R$ {alert.amount.toLocaleString("pt-BR")}
-                      </span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Right */}
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <div className="flex items-center gap-1">
-                    <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
-                    <span className={`text-[11px] font-medium ${
+                <Link
+                  to={`/alertas/${alert.id}`}
+                  className="flex items-start gap-4 px-5 py-3.5 hover:bg-secondary/20 transition-colors group cursor-pointer"
+                >
+                  {/* Icon */}
+                  <div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${
+                    alert.severity === "high" ? "bg-destructive/10" :
+                    alert.severity === "medium" ? "bg-warning/10" : "bg-secondary"
+                  }`}>
+                    <Icon className={`w-3.5 h-3.5 ${
                       alert.severity === "high" ? "text-destructive" :
                       alert.severity === "medium" ? "text-warning" : "text-muted-foreground"
-                    }`}>{SEVERITY_LABELS[alert.severity]}</span>
+                    }`} />
                   </div>
-                  <span className="text-[11px] text-muted-foreground font-mono">
-                    {format(new Date(alert.date), "dd/MM", { locale: ptBR })}
-                  </span>
-                </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                      <span className="text-foreground text-sm font-medium">{alert.employee}</span>
+                      <span className="text-muted-foreground text-xs">·</span>
+                      <span className="text-muted-foreground text-xs">{alert.department}</span>
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sev.badge}`}>
+                        {VIOLATION_TYPE_LABELS[alert.type]}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground text-xs leading-relaxed truncate">
+                      {alert.description}
+                      {alert.amount && (
+                        <span className="text-foreground font-mono ml-1">
+                          — R$ {alert.amount.toLocaleString("pt-BR")}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Right */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                      <span className={`text-[11px] font-medium ${
+                        alert.severity === "high" ? "text-destructive" :
+                        alert.severity === "medium" ? "text-warning" : "text-muted-foreground"
+                      }`}>{SEVERITY_LABELS[alert.severity]}</span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground font-mono">
+                      {format(new Date(alert.date), "dd/MM", { locale: ptBR })}
+                    </span>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </Link>
               </motion.div>
             );
           })}

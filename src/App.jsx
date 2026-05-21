@@ -9,6 +9,7 @@ import AppShell from './components/layout/AppShell';
 import DashboardPage from './pages/DashboardPage';
 import PolicyPage from './pages/PolicyPage';
 import UsersPage from './pages/UsersPage';
+import ViolationDetailPage from './pages/ViolationDetailPage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
+        <Route path="/alertas/:id" element={<ViolationDetailPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
