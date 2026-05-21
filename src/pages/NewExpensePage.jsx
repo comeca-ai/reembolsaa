@@ -67,6 +67,13 @@ export default function NewExpensePage() {
   const handleSubmit = async (formData) => {
     setStage("VERDICT");
 
+    // Notify manager by email
+    base44.integrations.Core.SendEmail({
+      to: "carlos@construtecbr.com.br", // gestor imediato
+      subject: `Nova despesa para revisão — ${formData.category} R$ ${Number(formData.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+      body: `Olá Carlos,\n\nMariana Costa submeteu uma nova solicitação de reembolso que aguarda sua revisão:\n\n• Categoria: ${formData.category}\n• Valor: R$ ${Number(formData.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}\n• Fornecedor: ${formData.vendor || "—"}\n• Data: ${formData.date || "—"}\n• Descrição: ${formData.description || "—"}\n\nAcesse o painel de Aprovações para analisar a solicitação.\n\nReembolsaaí`,
+    }).catch(() => {}); // fire-and-forget
+
     // AI compliance check against policy rules
     const check = await base44.integrations.Core.InvokeLLM({
       prompt: `Você é um auditor de compliance de reembolsos corporativos. Avalie se esta despesa está em conformidade com a política da empresa.

@@ -1,8 +1,9 @@
 import React from "react";
-import { CheckCircle2, XCircle, AlertTriangle, Plus, ArrowRight } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Plus, ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import ViolationChat from "@/components/expense/ViolationChat";
 
 const CONFIG = {
   approved: {
@@ -14,12 +15,12 @@ const CONFIG = {
     desc:  "Esta despesa está dentro da política da empresa.",
   },
   review: {
-    icon:  AlertTriangle,
+    icon:  Clock,
     color: "text-warning",
     bg:    "bg-warning/10",
-    border:"border-warning/20",
-    label: "Requer revisão do gestor",
-    desc:  "Há pontos que precisam de aprovação manual.",
+    border:"border-warning/30",
+    label: "Em análise de violação",
+    desc:  "Esta despesa foi sinalizada e está aguardando revisão do gestor. Adicione informações adicionais abaixo.",
   },
   rejected: {
     icon:  XCircle,
@@ -84,6 +85,13 @@ export default function ComplianceVerdict({ verdict, onNew }) {
           </div>
         )}
       </motion.div>
+
+      {/* Violation chat — only for review status */}
+      {status === "review" && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <ViolationChat expenseId={`exp-${Date.now()}`} />
+        </motion.div>
+      )}
 
       {/* Summary */}
       <div className="bg-card border border-border rounded-xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
