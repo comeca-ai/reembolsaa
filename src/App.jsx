@@ -5,7 +5,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import AppShell from './components/layout/AppShell';
 import PolicyPage from './pages/PolicyPage';
+import UsersPage from './pages/UsersPage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +36,10 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<PolicyPage />} />
+      <Route element={<AppShell />}>
+        <Route path="/" element={<PolicyPage />} />
+        <Route path="/usuarios" element={<UsersPage />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
