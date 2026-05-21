@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import PolicyPage from './pages/PolicyPage';
 import UsersPage from './pages/UsersPage';
 import ViolationDetailPage from './pages/ViolationDetailPage';
+import FinancialPage from './pages/FinancialPage';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -43,6 +44,7 @@ const AuthenticatedApp = () => {
         <Route path="/politica" element={<PolicyPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
         <Route path="/alertas/:id" element={<ViolationDetailPage />} />
+        <Route path="/financeiro" element={<FinancialPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
