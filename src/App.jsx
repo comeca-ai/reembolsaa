@@ -43,7 +43,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/landing" element={<LandingPage />} />
       <Route element={<AppShell />}>
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
         <Route path="/alertas/:id" element={<ViolationDetailPage />} />
@@ -63,7 +63,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <Routes>
-            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>

@@ -4,7 +4,7 @@ import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle } 
 import { CURRENT_USER } from "@/lib/mockData";
 
 const NAV_ITEMS = [
-  { path: "/",             label: "Dashboard",    icon: LayoutDashboard },
+  { path: "/dashboard",    label: "Dashboard",    icon: LayoutDashboard },
   { path: "/nova-despesa", label: "Nova Despesa", icon: PlusCircle },
   { path: "/financeiro",   label: "Financeiro",   icon: TrendingUp },
   { path: "/politica",     label: "Política",     icon: Shield },

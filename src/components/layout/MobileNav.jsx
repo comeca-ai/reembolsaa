@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Shield, Users, TrendingUp, PlusCircle } from "lucide-react";
 
 const NAV_ITEMS = [
-  { path: "/",             label: "Dashboard",  icon: LayoutDashboard },
+  { path: "/dashboard",    label: "Dashboard",  icon: LayoutDashboard },
   { path: "/nova-despesa", label: "Despesa",    icon: PlusCircle },
   { path: "/financeiro",   label: "Financeiro", icon: TrendingUp },
   { path: "/politica",     label: "Política",   icon: Shield },

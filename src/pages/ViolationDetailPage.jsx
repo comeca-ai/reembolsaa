@@ -61,7 +61,7 @@ export default function ViolationDetailPage() {
           transition={{ duration: 0.3 }}
         >
           <Link
-            to="/"
+            to="/dashboard"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
