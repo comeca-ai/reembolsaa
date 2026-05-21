@@ -1,10 +1,11 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Users } from "lucide-react";
+import { LayoutDashboard, Shield, Users } from "lucide-react";
 
 const NAV_ITEMS = [
-  { path: "/", label: "Política", icon: Shield },
-  { path: "/usuarios", label: "Usuários", icon: Users },
+  { path: "/",         label: "Dashboard", icon: LayoutDashboard },
+  { path: "/politica", label: "Política",  icon: Shield },
+  { path: "/usuarios", label: "Usuários",  icon: Users },
 ];
 
 export default function MobileNav() {
