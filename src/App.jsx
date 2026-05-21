@@ -14,6 +14,7 @@ import FinancialPage from './pages/FinancialPage';
 import NewExpensePage from './pages/NewExpensePage';
 import LandingPage from './pages/LandingPage';
 import OnboardingPage from './pages/OnboardingPage';
+import WebhookTest from './pages/WebhookTest';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -44,6 +45,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/comecar" element={<OnboardingPage />} />
+      <Route path="/webhook-test" element={<WebhookTest />} />
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
