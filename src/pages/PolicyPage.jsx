@@ -2,6 +2,9 @@ import React, { useState, useCallback } from "react";
 import { Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { EXTRACTED_RULES, VERSION_HISTORY } from "@/lib/mockData";
+import { base44 } from "@/api/base44Client";
+
+const N8N_WEBHOOK = "https://workflows.oreembolsobot.app/webhook-test/01772137-eb84-4ed4-a308-d5dfe1eb06f2";
 
 import EmptyState from "@/components/policy/EmptyState";
 import UploadingState from "@/components/policy/UploadingState";
@@ -18,9 +21,23 @@ export default function PolicyPage() {
   const [currentVersion, setCurrentVersion] = useState(3);
   const [versions, setVersions] = useState(VERSION_HISTORY);
 
-  const handleFileSelected = useCallback((file) => {
+  const handleFileSelected = useCallback(async (file) => {
     setFileName(file.name);
     setScreenState("uploading");
+
+    // Upload to base44 storage first, then send URL to n8n
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      
+      // Send to n8n webhook as JSON with the file URL
+      await fetch(N8N_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_url, file_name: file.name }),
+      });
+    } catch (err) {
+      console.error("Erro ao enviar para n8n:", err);
+    }
   }, []);
 
   const handleUploadComplete = useCallback(() => {
