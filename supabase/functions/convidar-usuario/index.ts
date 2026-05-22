@@ -4,6 +4,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 // Convida colaboradores por e-mail (SMTP nativo do Supabase via inviteUserByEmail).
 // Segurança: só admin convida, e a empresa vem SEMPRE do banco (do JWT do caller),
 // nunca do payload — impede convidar para empresa de terceiros.
+// Reenvio: se o e-mail já existe mas é um convidado PENDENTE (nunca aceitou), apaga
+// e reconvida (reenvia o e-mail). Se for conta ativa, devolve mensagem clara.
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -17,6 +19,13 @@ const corsHeaders = {
 };
 function json(obj: unknown, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+}
+const isEmailExists = (msg: string) => /already.*registered|already exists|email_exists/i.test(msg || "");
+
+async function findUserByEmail(admin: any, email: string) {
+  const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  if (error || !data?.users) return null;
+  return data.users.find((u: any) => (u.email || "").toLowerCase() === email) || null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -48,8 +57,9 @@ Deno.serve(async (req: Request) => {
   const invites = Array.isArray(body?.invites) ? body.invites : [];
   const redirectTo = typeof body?.redirectTo === "string" ? body.redirectTo : undefined;
   if (!invites.length) return json({ error: "Nenhum convite enviado." }, 400);
+  const inviteOpts = redirectTo ? { redirectTo } : undefined;
 
-  const results: Array<{ email: string; ok: boolean; error?: string }> = [];
+  const results: Array<{ email: string; ok: boolean; resent?: boolean; error?: string }> = [];
 
   for (const inv of invites) {
     const email = String(inv?.email ?? "").trim().toLowerCase();
@@ -59,34 +69,43 @@ Deno.serve(async (req: Request) => {
       continue;
     }
 
-    // Remove convites pendentes antigos do mesmo e-mail/empresa (evita acúmulo).
+    // Convite pendente precisa existir ANTES do invite — o trigger handle_new_user
+    // o lê ao criar o auth.user e liga o profile à empresa/papel.
     await admin.from("invitations").delete()
       .eq("empresa_id", empresaId).eq("email", email).is("accepted_at", null);
-
-    // IMPORTANTE: a invitation precisa existir ANTES do invite — o trigger
-    // handle_new_user lê a invitation ao criar o auth.user e liga o profile à empresa/papel.
     const { data: invRow, error: insErr } = await admin.from("invitations")
       .insert({ empresa_id: empresaId, email, role, invited_by: user.id })
       .select("id").single();
-    if (insErr) {
-      results.push({ email, ok: false, error: insErr.message });
-      continue;
+    if (insErr) { results.push({ email, ok: false, error: insErr.message }); continue; }
+
+    let { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, inviteOpts);
+
+    // E-mail já existe: distingue convidado pendente (reenvia) de conta ativa.
+    if (inviteErr && isEmailExists(inviteErr.message)) {
+      const existing = await findUserByEmail(admin, email);
+      const pendente = existing && !existing.email_confirmed_at && !existing.last_sign_in_at;
+      if (pendente) {
+        // Reenvio: apaga o usuário pendente e reconvida (a invitation acima continua válida).
+        await admin.auth.admin.deleteUser(existing.id);
+        const retry = await admin.auth.admin.inviteUserByEmail(email, inviteOpts);
+        inviteErr = retry.error;
+        if (!inviteErr) { results.push({ email, ok: true, resent: true }); continue; }
+      } else {
+        await admin.from("invitations").delete().eq("id", invRow.id);
+        results.push({ email, ok: false, error: "Este e-mail já tem conta ativa no sistema." });
+        continue;
+      }
     }
 
-    const { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, redirectTo ? { redirectTo } : undefined);
     if (inviteErr) {
-      // Limpa a invitation pendente para não ficar pendurada.
       await admin.from("invitations").delete().eq("id", invRow.id);
-      const msg = /already.*registered|already exists|email_exists/i.test(inviteErr.message)
-        ? "Já existe uma conta com este e-mail."
-        : inviteErr.message;
-      results.push({ email, ok: false, error: msg });
+      results.push({ email, ok: false, error: inviteErr.message });
       continue;
     }
-
     results.push({ email, ok: true });
   }
 
   const sent = results.filter((r) => r.ok).length;
-  return json({ sent, total: results.length, results });
+  const resent = results.filter((r) => r.resent).length;
+  return json({ sent, resent, total: results.length, results });
 });

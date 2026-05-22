@@ -80,15 +80,21 @@ export default function UsersPage() {
     setFilterRole("all");
   };
 
-  const reportInvites = (res, successMsg) => {
-    if (res.sent > 0) toast.success(successMsg(res.sent));
-    (res.results || []).filter((r) => !r.ok).forEach((f) => toast.error(`${f.email}: ${f.error}`));
+  // Mostra toasts claros: novos enviados, reenviados, e erros por e-mail
+  // (incl. "já tem conta ativa", que vem da Edge Function).
+  const reportInvites = (res) => {
+    const results = res.results || [];
+    const novos = results.filter((r) => r.ok && !r.resent).length;
+    const reenviados = res.resent ?? results.filter((r) => r.resent).length;
+    if (novos > 0) toast.success(`${novos} convite${novos > 1 ? "s" : ""} enviado${novos > 1 ? "s" : ""}!`);
+    if (reenviados > 0) toast.success(`${reenviados} convite${reenviados > 1 ? "s" : ""} reenviado${reenviados > 1 ? "s" : ""}!`);
+    results.filter((r) => !r.ok).forEach((f) => toast.error(`${f.email}: ${f.error}`));
   };
 
   const handleInvite = async (invites) => {
     try {
       const res = await convidarUsuarios(invites.map((i) => ({ email: i.email, role: i.role })), inviteRedirect);
-      reportInvites(res, (n) => `${n} convite${n > 1 ? "s" : ""} enviado${n > 1 ? "s" : ""}!`);
+      reportInvites(res);
       refetch();
     } catch (e) { toast.error(e?.message || "Erro ao enviar convites"); }
   };
@@ -114,8 +120,9 @@ export default function UsersPage() {
   const handleResendInvite = async (user) => {
     try {
       const res = await convidarUsuarios([{ email: user.email, role: user.role }], inviteRedirect);
-      if (res.sent > 0) toast.success(`Convite reenviado para ${user.email}.`);
-      else toast.error(res.results?.[0]?.error || "Não foi possível reenviar.");
+      const r = res.results?.[0];
+      if (r?.ok) toast.success(`Convite reenviado para ${user.email}.`);
+      else toast.error(`${user.email}: ${r?.error || "Não foi possível reenviar."}`);
     } catch (e) { toast.error(e?.message || "Erro ao reenviar convite"); }
   };
 
@@ -123,7 +130,7 @@ export default function UsersPage() {
     // Importação = convite em massa; o papel vem do CSV.
     try {
       const res = await convidarUsuarios(rows.map((r) => ({ email: r.email, role: r.papel })), inviteRedirect);
-      reportInvites(res, (n) => `${n} convite${n > 1 ? "s" : ""} enviado${n > 1 ? "s" : ""}!`);
+      reportInvites(res);
       refetch();
     } catch (e) { toast.error(e?.message || "Erro ao importar"); }
   };
