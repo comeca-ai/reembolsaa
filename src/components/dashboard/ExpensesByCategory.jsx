@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
-import { CHART_COLORS } from "@/lib/dashboardMockData";
+import { CHART_COLORS } from "@/lib/mocks/dashboardMockData";
 
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;

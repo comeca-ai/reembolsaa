@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { AlertTriangle, FileX, ShieldOff, Copy, ChevronRight, Filter } from "lucide-react";
+import { AlertTriangle, FileX, ShieldOff, Copy, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { VIOLATION_TYPE_LABELS } from "@/lib/dashboardMockData";
-import UserAvatar from "@/components/users/UserAvatar";
+import { VIOLATION_TYPE_LABELS } from "@/lib/mocks/dashboardMockData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";

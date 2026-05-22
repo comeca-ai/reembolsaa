@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Lightbulb, BookOpen, CheckSquare, AlertTriangle, FileX, ShieldOff, Copy, ChevronRight, CheckCircle2, XCircle } from "lucide-react";
+import { Lightbulb, BookOpen, CheckSquare, AlertTriangle, FileX, ShieldOff, Copy, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 

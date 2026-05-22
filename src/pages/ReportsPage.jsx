@@ -7,8 +7,8 @@ import {
   EXPENSE_BY_COLLABORATOR,
   CATEGORY_TOTALS,
   REPORT_KPIS,
-} from "@/lib/reportsMockData";
-import { VOLUME_BY_DEPARTMENT } from "@/lib/dashboardMockData";
+} from "@/lib/mocks/reportsMockData";
+import { VOLUME_BY_DEPARTMENT } from "@/lib/mocks/dashboardMockData";
 import ReportKpiRow from "@/components/reports/ReportKpiRow";
 import CategoryLineChart from "@/components/reports/CategoryLineChart";
 import DepartmentAreaChart from "@/components/reports/DepartmentAreaChart";

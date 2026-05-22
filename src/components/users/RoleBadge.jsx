@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { ROLE_LABELS } from "@/lib/mockData";
+import { ROLE_LABELS } from "@/lib/mocks/mockData";
 
 const ROLE_STYLES = {
   admin: "border-primary/30 text-primary bg-primary/8",

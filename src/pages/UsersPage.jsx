@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { Users, UserPlus, Search, SlidersHorizontal, X, Upload } from "lucide-react";
+import { Users, UserPlus, Search, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { MOCK_USERS, ROLE_LABELS } from "@/lib/mockData";
+import { MOCK_USERS, ROLE_LABELS } from "@/lib/mocks/mockData";
 import UsersStatsBar from "@/components/users/UsersStatsBar";
 import UsersTable from "@/components/users/UsersTable";
 import InviteModal from "@/components/users/InviteModal";

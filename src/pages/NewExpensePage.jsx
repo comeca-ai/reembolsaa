@@ -1,123 +1,23 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2, CheckCircle2, PlusCircle, Upload, ImagePlus, X, Wand2, AlertTriangle, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CATEGORIAS, createDespesa, listPoliticas, extrairRecibo, uploadComprovante } from "@/api/despesas";
-import { analisarDespesa } from "@/api/politica";
-import { useAuth } from "@/lib/AuthContext";
+import { CATEGORIAS } from "@/api/despesas";
+import { useNewExpense } from "@/hooks/useNewExpense";
 
-const today = () => new Date().toISOString().slice(0, 10);
 const brl = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
 export default function NewExpensePage() {
-  const navigate = useNavigate();
-  const { empresa, user, profile } = useAuth();
-  const queryClient = useQueryClient();
-
-  const { data: politicas = [] } = useQuery({ queryKey: ["politicas"], queryFn: listPoliticas });
-
-  const [form, setForm] = useState({
-    colaborador: profile?.nome || "",
-    centro_custo: "",
-    categoria: "Alimentação",
-    valor_brl: "",
-    data: today(),
-    observacao: "",
-  });
-  const [receipt, setReceipt] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [ocrLoading, setOcrLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
-  const [ocr, setOcr] = useState(null);             // resposta do OCR (itens)
-  const [conformidade, setConformidade] = useState(null); // veredito do agente de análise
-  const [ocrStage, setOcrStage] = useState("");     // "lendo" | "analisando" | ""
-
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const polCat = politicas.find((p) => p.categoria === form.categoria);
-  const limite = polCat ? (polCat.diario_brl ?? polCat.por_noite_brl ?? polCat.teto_mes_brl) : null;
-  const valorNum = Number(form.valor_brl) || 0;
-  const acima = limite != null && valorNum > Number(limite);
-  const bloqueado = conformidade?.status === "revisar";
-  const motivosIA = conformidade?.motivos || [];
-  const precisaRevisar = acima || bloqueado;
-
-  const handleReceipt = async (file) => {
-    if (!file) return;
-    setError("");
-    setConformidade(null);
-    setReceipt(file);
-    if (file.type.startsWith("image/")) setPreview(URL.createObjectURL(file));
-    setOcrLoading(true);
-    try {
-      // 1) OCR — extrai os campos e itens do comprovante
-      setOcrStage("lendo");
-      const d = await extrairRecibo(file);
-      setOcr(d);
-      setForm((f) => ({
-        ...f,
-        valor_brl: d.valor_brl != null ? String(d.valor_brl) : f.valor_brl,
-        data: d.data || f.data,
-        categoria: CATEGORIAS.includes(d.categoria) ? d.categoria : f.categoria,
-        observacao: [d.descricao, d.fornecedor].filter(Boolean).join(" — ") || f.observacao,
-      }));
-      // 2) Agente de análise de política — decide aprovar/revisar com raciocínio
-      setOcrStage("analisando");
-      const verdict = await analisarDespesa({
-        despesa: d,
-        politicaTexto: empresa?.politica_texto,
-        politicas,
-      });
-      setConformidade(verdict);
-    } catch (err) {
-      setError(err?.message || "Não consegui ler o comprovante. Preencha manualmente.");
-    } finally {
-      setOcrLoading(false);
-      setOcrStage("");
-    }
-  };
-
-  const mutation = useMutation({
-    mutationFn: async () => {
-      let comprovante = null;
-      if (receipt) {
-        try { comprovante = await uploadComprovante(receipt, empresa.id); } catch (_) { /* segue sem anexo */ }
-      }
-      return createDespesa({
-        empresaId: empresa?.id,
-        userId: user?.id,
-        colaborador: form.colaborador.trim() || profile?.nome || "Colaborador",
-        centro_custo: form.centro_custo.trim(),
-        categoria: form.categoria,
-        valor_brl: Number(form.valor_brl),
-        data: form.data,
-        observacao: form.observacao.trim(),
-        comprovante,
-        politicas,
-        bloqueado,
-        motivos: motivosIA,
-      });
-    },
-    onSuccess: (row) => {
-      queryClient.invalidateQueries({ queryKey: ["despesas"] });
-      setResult(row);
-    },
-    onError: (e) => setError(e?.message || "Erro ao salvar despesa"),
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-    if (!form.valor_brl || valorNum <= 0) return setError("Informe um valor válido.");
-    if (!form.data) return setError("Informe a data.");
-    mutation.mutate();
-  };
+  const {
+    form, set,
+    receipt, preview, ocr, ocrLoading, ocrStage, handleReceipt, clearReceipt,
+    limite, valorNum, acima, motivosIA, precisaRevisar, conformidade,
+    error, result, isSaving, submit, reset, navigate,
+  } = useNewExpense();
 
   // ---------- Resultado (veredito) ----------
   if (result) {
@@ -158,7 +58,7 @@ export default function NewExpensePage() {
             <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="text-foreground">{aprovada ? "Aprovada" : "Pendente"}</span></div>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={() => { setResult(null); setReceipt(null); setPreview(null); setForm({ colaborador: profile?.nome || "", centro_custo: "", categoria: "Alimentação", valor_brl: "", data: today(), observacao: "" }); }}>
+            <Button variant="outline" className="flex-1" onClick={reset}>
               Nova despesa
             </Button>
             <Button className="flex-1" onClick={() => navigate(aprovada ? "/dashboard" : "/aprovacoes")}>
@@ -224,12 +124,12 @@ export default function NewExpensePage() {
                   <p className="text-muted-foreground text-xs mt-1">Campos preenchidos — confira abaixo.</p>
                 )}
               </div>
-              <button onClick={() => { setReceipt(null); setPreview(null); }} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+              <button onClick={clearReceipt} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
             </div>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
+        <form onSubmit={submit} className="bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="colaborador">Colaborador</Label>
@@ -309,8 +209,8 @@ export default function NewExpensePage() {
 
           {error && <p className="text-destructive text-sm">{error}</p>}
 
-          <Button type="submit" disabled={mutation.isPending || ocrLoading} className="w-full h-11 text-base">
-            {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Lançar despesa</>}
+          <Button type="submit" disabled={isSaving || ocrLoading} className="w-full h-11 text-base">
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Lançar despesa</>}
           </Button>
         </form>
       </div>

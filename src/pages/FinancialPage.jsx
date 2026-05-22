@@ -7,7 +7,7 @@ import {
   COMPLIANCE_BY_MONTH,
   PAYMENT_STATUS_DONUT,
   FINANCIAL_KPIS,
-} from "@/lib/financialMockData";
+} from "@/lib/mocks/financialMockData";
 
 import FinancialKpiCard from "@/components/financial/FinancialKpiCard";
 import BudgetByCostCenter from "@/components/financial/BudgetByCostCenter";

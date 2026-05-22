@@ -1,5 +1,4 @@
 import React from "react";
-import { TrendingUp } from "lucide-react";
 
 const BRL = (v) => `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`;
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { CHART_COLORS } from "@/lib/dashboardMockData";
+import { CHART_COLORS } from "@/lib/mocks/dashboardMockData";
 
 const DEPARTMENTS = ["Obras", "Comercial", "Financeiro", "Administrativo", "TI", "RH"];
 

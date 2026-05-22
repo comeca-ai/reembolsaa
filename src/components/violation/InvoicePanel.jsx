@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { FileX, ZoomIn, ZoomOut, ExternalLink, Receipt } from "lucide-react";
+import { FileX, ZoomIn, ZoomOut, Receipt } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { motion } from "framer-motion";
 
 export default function InvoicePanel({ invoice, alert }) {
   const [zoomed, setZoomed] = useState(false);

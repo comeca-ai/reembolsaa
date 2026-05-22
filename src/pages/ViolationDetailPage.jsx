@@ -7,8 +7,8 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import { VIOLATION_ALERTS, VIOLATION_TYPE_LABELS } from "@/lib/dashboardMockData";
-import { MOCK_INVOICES, APPROVAL_HISTORY_BY_CATEGORY, ACTION_SUGGESTIONS } from "@/lib/violationDetailMock";
+import { VIOLATION_ALERTS, VIOLATION_TYPE_LABELS } from "@/lib/mocks/dashboardMockData";
+import { MOCK_INVOICES, APPROVAL_HISTORY_BY_CATEGORY, ACTION_SUGGESTIONS } from "@/lib/mocks/violationDetailMock";
 
 import InvoicePanel from "@/components/violation/InvoicePanel";
 import ApprovalHistoryPanel from "@/components/violation/ApprovalHistoryPanel";

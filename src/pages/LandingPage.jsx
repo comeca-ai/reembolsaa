@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  CheckCircle2, ArrowRight, Sparkles, Shield, Zap, FileText,
+  CheckCircle2, ArrowRight, Sparkles, FileText,
   MessageCircle, BarChart3, GitBranch, Clock, TrendingUp,
-  ChevronDown, Star, Building2, Users, DollarSign, AlertTriangle
+  ChevronDown, Building2, AlertTriangle
 } from "lucide-react";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────────

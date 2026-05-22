@@ -3,7 +3,6 @@ import { History, CheckCircle2, XCircle, Clock, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
-import UserAvatar from "@/components/users/UserAvatar";
 
 const STATUS_CONFIG = {
   approved: {

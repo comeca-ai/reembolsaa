@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Download, FileText, Table2, Loader2 } from "lucide-react";
+import { FileText, Table2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function buildCSV(collaborators, categories, departments) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { CHART_COLORS } from "@/lib/dashboardMockData";
+import { CHART_COLORS } from "@/lib/mocks/dashboardMockData";
 
 const CATEGORIES = ["Alimentação", "Transporte", "Hospedagem", "Representação", "Combustível"];
 

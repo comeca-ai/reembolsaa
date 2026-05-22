@@ -1,7 +1,7 @@
 import React from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend, Cell
+  ResponsiveContainer, Legend
 } from "recharts";
 import { motion } from "framer-motion";
 

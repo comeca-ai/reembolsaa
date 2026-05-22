@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Sector } from "recharts";
-import { CHART_COLORS } from "@/lib/dashboardMockData";
+import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from "recharts";
+import { CHART_COLORS } from "@/lib/mocks/dashboardMockData";
 
 const BRL = (v) => `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 0 })}`;
 

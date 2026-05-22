@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, XCircle, Clock, Search, Loader2, AlertTriangle, DollarSign } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Search, Loader2, AlertTriangle, DollarSign, MessageCircle, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,14 @@ const STATUS_TABS = [
 const tabOf = (status) =>
   status === "pendente" ? "pending" :
   status === "reprovada" ? "rejected" : "approved";
+
+// Origem da despesa (como o colaborador a enviou). O fallback é "web" porque toda
+// despesa lançada pelo app vem do formulário; o webhook do WhatsApp grava "whatsapp".
+const CHANNEL_META = {
+  whatsapp: { label: "WhatsApp", Icon: MessageCircle, cls: "bg-[#25D366]/10 text-[#25D366] border-[#25D366]/25" },
+  web:      { label: "Web",      Icon: Globe,         cls: "bg-secondary text-muted-foreground border-border" },
+};
+const channelMeta = (canal) => CHANNEL_META[canal] ?? CHANNEL_META.web;
 
 export default function ApprovalPage() {
   const { empresa, profile } = useAuth();
@@ -136,6 +144,7 @@ export default function ApprovalPage() {
               ) : (
                 filtered.map((d) => {
                   const acima = d.policy_kind === "acima";
+                  const canal = channelMeta(d.canal);
                   const isRejecting = rejectingId === d.id;
                   return (
                     <motion.div
@@ -154,6 +163,12 @@ export default function ApprovalPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className="font-medium text-foreground text-sm">{d.colaborador}</span>
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${canal.cls}`}
+                              title={`Enviada via ${canal.label}`}
+                            >
+                              <canal.Icon className="w-3 h-3" /> {canal.label}
+                            </span>
                             <span className="text-muted-foreground text-xs">·</span>
                             <span className="text-muted-foreground text-xs">{d.centro_custo}</span>
                             <span className="text-muted-foreground text-xs">·</span>
