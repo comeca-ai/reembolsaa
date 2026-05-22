@@ -1,15 +1,9 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { ROLE_LABELS } from "@/lib/mocks/mockData";
-
-const ROLE_STYLES = {
-  admin: "border-primary/30 text-primary bg-primary/8",
-  approver: "border-warning/30 text-warning bg-warning/8",
-  employee: "border-border text-muted-foreground bg-secondary",
-};
+import { ROLE_LABELS, ROLE_BADGE_STYLES, DEFAULT_ROLE } from "@/lib/roles";
 
 export default function RoleBadge({ role }) {
-  const style = ROLE_STYLES[role] ?? ROLE_STYLES.employee;
+  const style = ROLE_BADGE_STYLES[role] ?? ROLE_BADGE_STYLES[DEFAULT_ROLE];
   return (
     <Badge variant="outline" className={`text-[11px] font-medium px-2 py-0.5 ${style}`}>
       {ROLE_LABELS[role] ?? role}

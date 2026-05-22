@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, Plus, Trash2 } from "lucide-react";
-import { ROLE_LABELS, DEPARTMENT_OPTIONS } from "@/lib/mocks/mockData";
+import { ROLE_OPTIONS, DEFAULT_ROLE } from "@/lib/roles";
 
-const ROLE_OPTIONS = Object.entries(ROLE_LABELS);
-
-const emptyInvite = () => ({ id: Date.now(), email: "", role: "employee", department: "" });
+const emptyInvite = () => ({ id: Date.now(), email: "", role: DEFAULT_ROLE });
 
 export default function InviteModal({ open, onClose, onInvite }) {
   const [invites, setInvites] = useState([emptyInvite()]);
@@ -50,28 +48,16 @@ export default function InviteModal({ open, onClose, onInvite }) {
                   value={invite.email}
                   onChange={(e) => update(invite.id, "email", e.target.value)}
                 />
-                <div className="grid grid-cols-2 gap-2">
-                  <Select value={invite.role} onValueChange={(v) => update(invite.id, "role", v)}>
-                    <SelectTrigger className="bg-secondary border-border text-xs h-8">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-border">
-                      {ROLE_OPTIONS.map(([val, lbl]) => (
-                        <SelectItem key={val} value={val} className="text-xs">{lbl}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={invite.department} onValueChange={(v) => update(invite.id, "department", v)}>
-                    <SelectTrigger className="bg-secondary border-border text-xs h-8">
-                      <SelectValue placeholder="Departamento" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-border">
-                      {DEPARTMENT_OPTIONS.map((d) => (
-                        <SelectItem key={d} value={d} className="text-xs">{d}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <Select value={invite.role} onValueChange={(v) => update(invite.id, "role", v)}>
+                  <SelectTrigger className="bg-secondary border-border text-xs h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    {ROLE_OPTIONS.map(({ value, label }) => (
+                      <SelectItem key={value} value={value} className="text-xs">{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button

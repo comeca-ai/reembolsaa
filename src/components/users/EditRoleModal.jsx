@@ -2,51 +2,27 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, CheckCircle2, User } from "lucide-react";
-import { DEPARTMENT_OPTIONS } from "@/lib/mocks/mockData";
+import { Shield, CheckCircle2, DollarSign, User } from "lucide-react";
+import { ROLES, ROLE_LABELS, ROLE_DESCRIPTIONS, DEFAULT_ROLE } from "@/lib/roles";
 import UserAvatar from "./UserAvatar";
 
-const ROLES = [
-  {
-    value: "admin",
-    label: "Administrador",
-    icon: Shield,
-    color: "text-primary",
-    bg: "bg-primary/10 border-primary/30",
-    desc: "Acesso total: gerencia usuários, política, relatórios e financeiro.",
-  },
-  {
-    value: "approver",
-    label: "Aprovador",
-    icon: CheckCircle2,
-    color: "text-warning",
-    bg: "bg-warning/10 border-warning/30",
-    desc: "Visualiza e aprova despesas enviadas pelos colaboradores.",
-  },
-  {
-    value: "employee",
-    label: "Colaborador",
-    icon: User,
-    color: "text-muted-foreground",
-    bg: "bg-secondary border-border",
-    desc: "Envia despesas para aprovação e acompanha o próprio histórico.",
-  },
-];
+// Ícone/cores por papel; rótulo e descrição vêm de lib/roles (fonte única).
+const ROLE_META = {
+  admin:       { icon: Shield,       color: "text-primary",          bg: "bg-primary/10 border-primary/30" },
+  aprovador:   { icon: CheckCircle2, color: "text-warning",          bg: "bg-warning/10 border-warning/30" },
+  financeiro:  { icon: DollarSign,   color: "text-chart-4",          bg: "bg-chart-4/10 border-chart-4/30" },
+  colaborador: { icon: User,         color: "text-muted-foreground", bg: "bg-secondary border-border" },
+};
 
 export default function EditRoleModal({ open, user, onClose, onSave }) {
-  const [role, setRole] = useState(user?.role ?? "employee");
-  const [department, setDepartment] = useState(user?.department ?? "");
+  const [role, setRole] = useState(user?.role ?? DEFAULT_ROLE);
 
   React.useEffect(() => {
-    if (user) {
-      setRole(user.role);
-      setDepartment(user.department ?? "");
-    }
+    if (user) setRole(user.role ?? DEFAULT_ROLE);
   }, [user]);
 
   const handleSave = () => {
-    onSave({ ...user, role, department });
+    onSave({ ...user, role });
     onClose();
   };
 
@@ -71,36 +47,25 @@ export default function EditRoleModal({ open, user, onClose, onSave }) {
           <div>
             <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">Nível de acesso</Label>
             <div className="space-y-2">
-              {ROLES.map(({ value, label, icon: Icon, color, bg, desc }) => (
-                <button
-                  key={value}
-                  onClick={() => setRole(value)}
-                  className={`w-full flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
-                    role === value ? bg : "border-border bg-secondary/40 hover:bg-secondary"
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${role === value ? color : "text-muted-foreground"}`} />
-                  <div>
-                    <p className={`text-sm font-medium ${role === value ? color : "text-foreground"}`}>{label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
-                  </div>
-                </button>
-              ))}
+              {ROLES.map((value) => {
+                const { icon: Icon, color, bg } = ROLE_META[value];
+                return (
+                  <button
+                    key={value}
+                    onClick={() => setRole(value)}
+                    className={`w-full flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
+                      role === value ? bg : "border-border bg-secondary/40 hover:bg-secondary"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${role === value ? color : "text-muted-foreground"}`} />
+                    <div>
+                      <p className={`text-sm font-medium ${role === value ? color : "text-foreground"}`}>{ROLE_LABELS[value]}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{ROLE_DESCRIPTIONS[value]}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          </div>
-
-          <div>
-            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Departamento</Label>
-            <Select value={department} onValueChange={setDepartment}>
-              <SelectTrigger className="mt-1.5 bg-secondary border-border">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {DEPARTMENT_OPTIONS.map((d) => (
-                  <SelectItem key={d} value={d}>{d}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </div>
 

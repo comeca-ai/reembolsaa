@@ -2,13 +2,14 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Upload, CheckCircle2, AlertCircle, FileText, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ROLES } from "@/lib/roles";
 
 const CSV_TEMPLATE = `nome,email,cargo,setor,papel
-Mariana Costa,mariana@empresa.com.br,Analista,Financeiro,employee
-Carlos Almeida,carlos@empresa.com.br,Gestor,Obras,manager`;
+Mariana Costa,mariana@empresa.com.br,Analista,Financeiro,colaborador
+Carlos Almeida,carlos@empresa.com.br,Gestor,Obras,aprovador`;
 
 const REQUIRED_COLS = ["nome", "email", "cargo", "setor", "papel"];
-const VALID_ROLES = ["admin", "manager", "employee"];
+const VALID_ROLES = ROLES;
 
 function parseCSV(text) {
   const lines = text.trim().split("\n").map((l) => l.trim()).filter(Boolean);
@@ -30,7 +31,7 @@ function parseCSV(text) {
       return;
     }
     if (!VALID_ROLES.includes(obj.papel)) {
-      errors.push(`Linha ${i + 2}: papel inválido ("${obj.papel}"). Use: admin, manager ou employee`);
+      errors.push(`Linha ${i + 2}: papel inválido ("${obj.papel}"). Use: ${VALID_ROLES.join(", ")}`);
       return;
     }
     rows.push(obj);
