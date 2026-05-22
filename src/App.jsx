@@ -17,6 +17,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import PolicyOnboardingPage from './pages/PolicyOnboardingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import AceitarConvitePage from './pages/AceitarConvitePage';
 import ApprovalPage from './pages/ApprovalPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -73,6 +74,9 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
       <Route path="/cadastro" element={<PublicOnly><SignupPage /></PublicOnly>} />
+      {/* Aceite de convite: o link cria a sessão; o convidado define a senha.
+          Não fica sob PublicOnly porque o convite já deixa o usuário logado. */}
+      <Route path="/aceitar-convite" element={<AceitarConvitePage />} />
 
       {/* Autenticado, ainda sem empresa */}
       <Route path="/comecar" element={<RequireAuth><OnboardingPage /></RequireAuth>} />

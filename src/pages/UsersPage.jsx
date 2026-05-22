@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { Users, UserPlus, Search, X, Upload } from "lucide-react";
+import { Users, UserPlus, Search, X, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { MOCK_USERS } from "@/lib/mocks/mockData";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ROLE_LABELS } from "@/lib/roles";
+import { listProfiles, convidarUsuarios, atualizarPapel, removerUsuario } from "@/api/usuarios";
 import UsersStatsBar from "@/components/users/UsersStatsBar";
 import UsersTable from "@/components/users/UsersTable";
 import InviteModal from "@/components/users/InviteModal";
@@ -25,8 +26,32 @@ const ROLE_OPTIONS = [
   ...Object.entries(ROLE_LABELS).map(([v, l]) => ({ value: v, label: l })),
 ];
 
+const initials = (s) => (s || "?").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+
+// Mapeia um profile do Supabase para a forma que a tabela de usuários espera.
+function toUser(p) {
+  return {
+    id: p.id,
+    name: p.nome || (p.email ? p.email.split("@")[0] : "Usuário"),
+    email: p.email,
+    role: p.role || "colaborador",
+    status: "active",      // sem coluna de status no banco ainda — v1 mostra todos ativos
+    department: "",        // sem coluna de departamento no banco ainda
+    avatar: initials(p.nome || p.email),
+    invited_at: p.created_at,
+    joined_at: p.created_at,
+    last_expense: null,
+    expenses_count: 0,
+  };
+}
+
 export default function UsersPage() {
-  const [users, setUsers]               = useState(MOCK_USERS);
+  const queryClient = useQueryClient();
+  const { data: profiles = [], isLoading } = useQuery({ queryKey: ["profiles"], queryFn: listProfiles });
+  const users = useMemo(() => profiles.map(toUser), [profiles]);
+  const refetch = () => queryClient.invalidateQueries({ queryKey: ["profiles"] });
+  const inviteRedirect = `${window.location.origin}/aceitar-convite`;
+
   const [search, setSearch]             = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterRole, setFilterRole]     = useState("all");
@@ -55,56 +80,52 @@ export default function UsersPage() {
     setFilterRole("all");
   };
 
-  const handleInvite = (invites) => {
-    const newUsers = invites.map((inv, idx) => ({
-      id: `u-new-${Date.now()}-${idx}`,
-      name: inv.email.split("@")[0],
-      email: inv.email,
-      role: inv.role,
-      status: "pending",
-      department: inv.department || "",
-      invited_at: new Date().toISOString(),
-      joined_at: null,
-      avatar: inv.email.slice(0, 2).toUpperCase(),
-      last_expense: null,
-      expenses_count: 0,
-    }));
-    setUsers((prev) => [...newUsers, ...prev]);
-    toast.success(`${invites.length} convite${invites.length > 1 ? "s" : ""} enviado${invites.length > 1 ? "s" : ""}!`);
+  const reportInvites = (res, successMsg) => {
+    if (res.sent > 0) toast.success(successMsg(res.sent));
+    (res.results || []).filter((r) => !r.ok).forEach((f) => toast.error(`${f.email}: ${f.error}`));
+  };
+
+  const handleInvite = async (invites) => {
+    try {
+      const res = await convidarUsuarios(invites.map((i) => ({ email: i.email, role: i.role })), inviteRedirect);
+      reportInvites(res, (n) => `${n} convite${n > 1 ? "s" : ""} enviado${n > 1 ? "s" : ""}!`);
+      refetch();
+    } catch (e) { toast.error(e?.message || "Erro ao enviar convites"); }
   };
 
   const handleEdit = (user) => setEditUser(user);
 
-  const handleSaveEdit = (updated) => {
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
-    toast.success("Acesso atualizado.");
+  const handleSaveEdit = async (updated) => {
+    try {
+      await atualizarPapel(updated.id, updated.role);
+      toast.success("Acesso atualizado.");
+      refetch();
+    } catch (e) { toast.error(e?.message || "Erro ao atualizar acesso"); }
   };
 
-  const handleRemove = (id) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
-    toast.success("Usuário removido.");
+  const handleRemove = async (id) => {
+    try {
+      await removerUsuario(id);
+      toast.success("Usuário removido.");
+      refetch();
+    } catch (e) { toast.error(e?.message || "Erro ao remover usuário"); }
   };
 
-  const handleResendInvite = (user) => {
-    toast.success(`Convite reenviado para ${user.email}.`);
+  const handleResendInvite = async (user) => {
+    try {
+      const res = await convidarUsuarios([{ email: user.email, role: user.role }], inviteRedirect);
+      if (res.sent > 0) toast.success(`Convite reenviado para ${user.email}.`);
+      else toast.error(res.results?.[0]?.error || "Não foi possível reenviar.");
+    } catch (e) { toast.error(e?.message || "Erro ao reenviar convite"); }
   };
 
-  const handleImport = (rows) => {
-    const newUsers = rows.map((r, idx) => ({
-      id: `u-imp-${Date.now()}-${idx}`,
-      name: r.nome,
-      email: r.email,
-      role: r.papel,
-      status: "pending",
-      department: r.setor || "",
-      invited_at: new Date().toISOString(),
-      joined_at: null,
-      avatar: r.nome.slice(0, 2).toUpperCase(),
-      last_expense: null,
-      expenses_count: 0,
-    }));
-    setUsers((prev) => [...newUsers, ...prev]);
-    toast.success(`${rows.length} usuário${rows.length !== 1 ? "s" : ""} importado${rows.length !== 1 ? "s" : ""}!`);
+  const handleImport = async (rows) => {
+    // Importação = convite em massa; o papel vem do CSV.
+    try {
+      const res = await convidarUsuarios(rows.map((r) => ({ email: r.email, role: r.papel })), inviteRedirect);
+      reportInvites(res, (n) => `${n} convite${n > 1 ? "s" : ""} enviado${n > 1 ? "s" : ""}!`);
+      refetch();
+    } catch (e) { toast.error(e?.message || "Erro ao importar"); }
   };
 
   return (
@@ -218,7 +239,11 @@ export default function UsersPage() {
         )}
 
         {/* Table / empty state */}
-        {filtered.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20 text-muted-foreground">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        ) : filtered.length > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
