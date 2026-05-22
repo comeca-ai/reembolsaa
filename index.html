@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Reembolsaaí — gestão de despesas e compliance de reembolsos, multi-empresa." />
     <title>Reembolsaaí</title>
+    <script>
+      // Aplica o tema antes da pintura para evitar flash. Escuro é o padrão;
+      // só fica claro se o usuário tiver escolhido (ver src/lib/ThemeContext).
+      (function () {
+        try {
+          if (localStorage.getItem("reembolsaa-theme") !== "light") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

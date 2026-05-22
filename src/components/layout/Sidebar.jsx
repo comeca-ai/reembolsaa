@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle, CheckCircle2, BarChart3, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const initials = (name = "") =>
   name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "·";
@@ -72,6 +73,7 @@ export default function Sidebar() {
             <p className="text-foreground text-xs font-medium truncate">{profile?.nome || "Usuário"}</p>
             <p className="text-muted-foreground text-[11px] truncate">{profile?.email}</p>
           </div>
+          <ThemeToggle />
           <button
             onClick={() => signOut()}
             title="Sair"

@@ -5,46 +5,48 @@
 @tailwind utilities;
 
 @layer base {
+  /* Tema CLARO (padrão do :root). O tema escuro fica em .dark e é o default da
+     marca — aplicado via classe no <html> (ver lib/ThemeContext + script no index.html). */
   :root {
     --font-heading: 'Bricolage Grotesque', sans-serif;
     --font-body: 'Hanken Grotesk', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    --background: 30 6% 5%;
-    --foreground: 40 6% 94%;
-    --card: 40 4% 8%;
-    --card-foreground: 40 6% 94%;
-    --popover: 40 4% 8%;
-    --popover-foreground: 40 6% 94%;
-    --primary: 73 86% 66%;
-    --primary-foreground: 30 6% 5%;
-    --secondary: 40 3% 11%;
-    --secondary-foreground: 40 6% 94%;
-    --muted: 40 3% 11%;
-    --muted-foreground: 40 3% 60%;
-    --accent: 73 86% 66%;
-    --accent-foreground: 30 6% 5%;
-    --destructive: 5 100% 70%;
-    --destructive-foreground: 40 6% 94%;
-    --warning: 43 87% 62%;
-    --warning-foreground: 30 6% 5%;
-    --border: 40 4% 16%;
-    --input: 40 4% 16%;
-    --ring: 73 86% 66%;
-    --chart-1: 73 86% 66%;
-    --chart-2: 43 87% 62%;
-    --chart-3: 5 100% 70%;
-    --chart-4: 200 60% 50%;
-    --chart-5: 280 60% 50%;
+    --background: 48 30% 98%;
+    --foreground: 30 8% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 8% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 8% 12%;
+    --primary: 73 64% 40%;
+    --primary-foreground: 60 30% 98%;
+    --secondary: 40 14% 94%;
+    --secondary-foreground: 30 8% 16%;
+    --muted: 40 14% 94%;
+    --muted-foreground: 35 6% 42%;
+    --accent: 73 64% 40%;
+    --accent-foreground: 60 30% 98%;
+    --destructive: 5 80% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 35 90% 42%;
+    --warning-foreground: 0 0% 100%;
+    --border: 40 12% 88%;
+    --input: 40 12% 88%;
+    --ring: 73 64% 40%;
+    --chart-1: 73 64% 40%;
+    --chart-2: 35 90% 42%;
+    --chart-3: 5 80% 52%;
+    --chart-4: 200 70% 45%;
+    --chart-5: 280 55% 50%;
     --radius: 0.75rem;
-    --sidebar-background: 40 4% 8%;
-    --sidebar-foreground: 40 6% 94%;
-    --sidebar-primary: 73 86% 66%;
-    --sidebar-primary-foreground: 30 6% 5%;
-    --sidebar-accent: 40 3% 11%;
-    --sidebar-accent-foreground: 40 6% 94%;
-    --sidebar-border: 40 4% 16%;
-    --sidebar-ring: 73 86% 66%;
+    --sidebar-background: 48 24% 96%;
+    --sidebar-foreground: 30 8% 12%;
+    --sidebar-primary: 73 64% 40%;
+    --sidebar-primary-foreground: 60 30% 98%;
+    --sidebar-accent: 40 14% 92%;
+    --sidebar-accent-foreground: 30 8% 16%;
+    --sidebar-border: 40 12% 88%;
+    --sidebar-ring: 73 64% 40%;
   }
 
   .dark {
