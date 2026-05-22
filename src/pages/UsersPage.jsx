@@ -35,7 +35,7 @@ function toUser(p) {
     name: p.nome || (p.email ? p.email.split("@")[0] : "Usuário"),
     email: p.email,
     role: p.role || "colaborador",
-    status: "active",      // sem coluna de status no banco ainda — v1 mostra todos ativos
+    status: p.pending ? "pending" : "active",  // pending = convite ainda não aceito
     department: "",        // sem coluna de departamento no banco ainda
     avatar: initials(p.nome || p.email),
     invited_at: p.created_at,

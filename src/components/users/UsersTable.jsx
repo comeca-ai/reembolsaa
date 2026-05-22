@@ -65,6 +65,17 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {user.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onResendInvite(user)}
+                          className="h-7 px-2.5 text-xs text-primary hover:text-primary gap-1.5"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Reenviar
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

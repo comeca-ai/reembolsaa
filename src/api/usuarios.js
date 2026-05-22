@@ -1,11 +1,10 @@
 import { supabase } from "@/lib/supabaseClient";
 
-// Lista os profiles da empresa do usuário (a RLS já filtra por tenant).
+// Lista a equipe da empresa já com a flag `pending` (convite não aceito).
+// Usa a RPC equipe_da_empresa (SECURITY DEFINER) porque o front não enxerga
+// auth.users; a função escopa por empresa via current_empresa_id().
 export async function listProfiles() {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, empresa_id, nome, email, role, created_at")
-    .order("created_at", { ascending: true });
+  const { data, error } = await supabase.rpc("equipe_da_empresa");
   if (error) throw error;
   return data || [];
 }
