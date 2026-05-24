@@ -19,6 +19,7 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
             <tr className="border-b border-border bg-secondary/50">
               <th className="text-left px-5 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Usuário</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Papel</th>
+              <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">WhatsApp</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Departamento</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Status</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Despesas</th>
@@ -48,6 +49,9 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                   </td>
                   <td className="px-4 py-3.5">
                     <RoleBadge role={user.role} />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="font-mono text-sm text-muted-foreground">{user.telefone || "—"}</span>
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="text-muted-foreground text-sm">{user.department || "—"}</span>
@@ -89,7 +93,7 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        onClick={() => onRemove(user.id)}
+                        onClick={() => onRemove(user)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
@@ -118,7 +122,8 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                 <UserAvatar avatar={user.avatar} name={user.name} />
                 <div className="min-w-0">
                   <p className="text-foreground text-sm font-medium truncate">{user.name}</p>
-                  <p className="text-muted-foreground text-xs truncate mb-1.5">{user.email}</p>
+                  <p className="text-muted-foreground text-xs truncate">{user.email}</p>
+                  <p className="text-muted-foreground text-xs font-mono truncate mb-1.5">{user.telefone || "—"}</p>
                   <div className="flex flex-wrap gap-1.5">
                     <RoleBadge role={user.role} />
                     <StatusDot status={user.status} />
@@ -171,7 +176,7 @@ function UserActions({ user, onEdit, onRemove, onResendInvite }) {
         <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
           className="gap-2 text-sm text-destructive hover:text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10"
-          onClick={() => onRemove(user.id)}
+          onClick={() => onRemove(user)}
         >
           <Trash2 className="w-3.5 h-3.5" />
           Remover usuário

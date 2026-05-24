@@ -23,9 +23,27 @@ function json(obj: unknown, status = 200) {
 const isEmailExists = (msg: string) => /already.*registered|already exists|email_exists/i.test(msg || "");
 
 async function findUserByEmail(admin: any, email: string) {
-  const { data, error } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  if (error || !data?.users) return null;
-  return data.users.find((u: any) => (u.email || "").toLowerCase() === email) || null;
+  // Prefer direct lookup if supported by the client
+  try {
+    if (admin?.auth?.admin?.getUserByEmail) {
+      const { data, error } = await admin.auth.admin.getUserByEmail(email);
+      if (!error && data) return data.user ?? data;
+      return null;
+    }
+  } catch (e) {
+    // fallthrough to listUsers pagination
+  }
+  // Fallback: paginate listUsers (perPage 1000) until found or safety limit
+  let page = 1;
+  const perPage = 1000;
+  for (; page <= 10; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ perPage, page });
+    if (error || !data?.users) return null;
+    const found = data.users.find((u: any) => (u.email || '').toLowerCase() === email);
+    if (found) return found;
+    if (data.users.length < perPage) break; // no more pages
+  }
+  return null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -64,6 +82,8 @@ Deno.serve(async (req: Request) => {
   for (const inv of invites) {
     const email = String(inv?.email ?? "").trim().toLowerCase();
     const role = ALLOWED_ROLES.includes(inv?.role) ? inv.role : "colaborador";
+    // telefone-br: guardado como só dígitos; opcional.
+    const telefone = String(inv?.telefone ?? "").replace(/\D/g, "");
     if (!email || !email.includes("@")) {
       results.push({ email, ok: false, error: "E-mail inválido" });
       continue;
@@ -78,7 +98,7 @@ Deno.serve(async (req: Request) => {
       .select("id").single();
     if (insErr) { results.push({ email, ok: false, error: insErr.message }); continue; }
 
-    let { error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, inviteOpts);
+    let { data: inviteData, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(email, inviteOpts);
 
     // E-mail já existe: distingue convidado pendente (reenvia) de conta ativa.
     if (inviteErr && isEmailExists(inviteErr.message)) {
@@ -86,10 +106,17 @@ Deno.serve(async (req: Request) => {
       const pendente = existing && !existing.email_confirmed_at && !existing.last_sign_in_at;
       if (pendente) {
         // Reenvio: apaga o usuário pendente e reconvida (a invitation acima continua válida).
+        // Registrar no log de auditoria (console) antes de deletar
+        console.info(`Reenvio de convite: apagando usuário pendente ${existing.id} (${email}) solicitado por ${user.id}`);
         await admin.auth.admin.deleteUser(existing.id);
         const retry = await admin.auth.admin.inviteUserByEmail(email, inviteOpts);
         inviteErr = retry.error;
-        if (!inviteErr) { results.push({ email, ok: true, resent: true }); continue; }
+        inviteData = retry.data;
+        if (!inviteErr) {
+          if (telefone) await admin.from("profiles").update({ telefone }).eq("id", inviteData?.user?.id);
+          results.push({ email, ok: true, resent: true });
+          continue;
+        }
       } else {
         await admin.from("invitations").delete().eq("id", invRow.id);
         results.push({ email, ok: false, error: "Este e-mail já tem conta ativa no sistema." });
@@ -102,6 +129,8 @@ Deno.serve(async (req: Request) => {
       results.push({ email, ok: false, error: inviteErr.message });
       continue;
     }
+    // Profile já existe (criado sincronamente pelo trigger handle_new_user no invite).
+    if (telefone) await admin.from("profiles").update({ telefone }).eq("id", inviteData?.user?.id);
     results.push({ email, ok: true });
   }
 

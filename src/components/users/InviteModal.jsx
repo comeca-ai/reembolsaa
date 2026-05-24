@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { ROLE_OPTIONS, DEFAULT_ROLE } from "@/lib/roles";
+import { telefoneValido } from "@/lib/telefone";
 
-const emptyInvite = () => ({ id: Date.now(), email: "", role: DEFAULT_ROLE });
+const emptyInvite = () => ({ id: Date.now(), email: "", role: DEFAULT_ROLE, telefone: "" });
 
 export default function InviteModal({ open, onClose, onInvite }) {
   const [invites, setInvites] = useState([emptyInvite()]);
@@ -22,6 +24,12 @@ export default function InviteModal({ open, onClose, onInvite }) {
   const handleSubmit = () => {
     const valid = invites.filter((i) => i.email.trim());
     if (!valid.length) return;
+    // WhatsApp é opcional, mas se preenchido precisa ser válido antes de enviar.
+    const telInvalido = valid.find((i) => i.telefone.trim() && !telefoneValido(i.telefone));
+    if (telInvalido) {
+      toast.error(`WhatsApp inválido para ${telInvalido.email || "o convite"}. Use DDI + DDD, ex: 5511999998888.`);
+      return;
+    }
     onInvite(valid);
     setInvites([emptyInvite()]);
     onClose();
@@ -58,6 +66,13 @@ export default function InviteModal({ open, onClose, onInvite }) {
                     ))}
                   </SelectContent>
                 </Select>
+                <Input
+                  className="bg-secondary border-border text-sm font-mono"
+                  placeholder="5511999998888"
+                  inputMode="tel"
+                  value={invite.telefone}
+                  onChange={(e) => update(invite.id, "telefone", e.target.value)}
+                />
               </div>
 
               <Button
@@ -71,6 +86,10 @@ export default function InviteModal({ open, onClose, onInvite }) {
             </div>
           ))}
         </div>
+
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          WhatsApp é opcional, mas sem ele o colaborador não consegue enviar despesas por esse canal.
+        </p>
 
         <button
           onClick={addRow}

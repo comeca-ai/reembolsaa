@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Shield, CheckCircle2, DollarSign, User } from "lucide-react";
+import { toast } from "sonner";
 import { ROLES, ROLE_LABELS, ROLE_DESCRIPTIONS, DEFAULT_ROLE } from "@/lib/roles";
+import { telefoneValido } from "@/lib/telefone";
 import UserAvatar from "./UserAvatar";
 
 // Ícone/cores por papel; rótulo e descrição vêm de lib/roles (fonte única).
@@ -16,13 +19,26 @@ const ROLE_META = {
 
 export default function EditRoleModal({ open, user, onClose, onSave }) {
   const [role, setRole] = useState(user?.role ?? DEFAULT_ROLE);
+  const [telefone, setTelefone] = useState(user?.telefone ?? "");
 
   React.useEffect(() => {
-    if (user) setRole(user.role ?? DEFAULT_ROLE);
+    if (user) {
+      setRole(user.role ?? DEFAULT_ROLE);
+      setTelefone(user.telefone ?? "");
+    }
   }, [user]);
 
+  // WhatsApp só é editável em profiles: o convite pendente ainda não tem profile
+  // onde gravar o telefone (o número informado no convite já foi persistido).
+  const isInvitation = user?.entityType === "invitation";
+
   const handleSave = () => {
-    onSave({ ...user, role });
+    // WhatsApp é opcional, mas se preenchido precisa ser válido antes de salvar.
+    if (!isInvitation && telefone.trim() && !telefoneValido(telefone)) {
+      toast.error("WhatsApp inválido. Use DDI + DDD, ex: 5511999998888.");
+      return;
+    }
+    onSave({ ...user, role, telefone });
     onClose();
   };
 
@@ -67,6 +83,25 @@ export default function EditRoleModal({ open, user, onClose, onSave }) {
               })}
             </div>
           </div>
+
+          {!isInvitation && (
+            <div>
+              <Label htmlFor="edit-telefone" className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
+                WhatsApp
+              </Label>
+              <Input
+                id="edit-telefone"
+                className="bg-secondary border-border text-sm font-mono"
+                placeholder="5511999998888"
+                inputMode="tel"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                Sem WhatsApp, este colaborador não consegue enviar despesas por esse canal.
+              </p>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2 pt-2">

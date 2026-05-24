@@ -7,7 +7,15 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ROLE_LABELS } from "@/lib/roles";
-import { listProfiles, convidarUsuarios, atualizarPapel, removerUsuario } from "@/api/usuarios";
+import {
+  listProfiles,
+  convidarUsuarios,
+  atualizarPapel,
+  atualizarPapelConvite,
+  atualizarTelefone,
+  removerUsuario,
+  removerConvite,
+} from "@/api/usuarios";
 import UsersStatsBar from "@/components/users/UsersStatsBar";
 import UsersTable from "@/components/users/UsersTable";
 import InviteModal from "@/components/users/InviteModal";
@@ -30,10 +38,19 @@ const initials = (s) => (s || "?").trim().split(/\s+/).map((w) => w[0]).slice(0,
 
 // Mapeia um profile do Supabase para a forma que a tabela de usuários espera.
 function toUser(p) {
+  const isInvitation = p.entity_type === "invitation";
+  const displayName =
+    p.nome ||
+    (p.email ? p.email.split("@")[0] : "Usuário");
+
   return {
     id: p.id,
-    name: p.nome || (p.email ? p.email.split("@")[0] : "Usuário"),
+    entityType: p.entity_type || "profile",
+    profileId: p.profile_id || (!isInvitation ? p.id : null),
+    invitationId: p.invitation_id || (isInvitation ? String(p.id).replace(/^invite:/, "") : null),
+    name: displayName,
     email: p.email,
+    telefone: p.telefone || "",   // WhatsApp (só dígitos); chave de roteamento por canal
     role: p.role || "colaborador",
     status: p.pending ? "pending" : "active",  // pending = convite ainda não aceito
     department: "",        // sem coluna de departamento no banco ainda
@@ -93,7 +110,7 @@ export default function UsersPage() {
 
   const handleInvite = async (invites) => {
     try {
-      const res = await convidarUsuarios(invites.map((i) => ({ email: i.email, role: i.role })), inviteRedirect);
+      const res = await convidarUsuarios(invites.map((i) => ({ email: i.email, role: i.role, telefone: i.telefone })), inviteRedirect);
       reportInvites(res);
       refetch();
     } catch (e) { toast.error(e?.message || "Erro ao enviar convites"); }
@@ -103,16 +120,31 @@ export default function UsersPage() {
 
   const handleSaveEdit = async (updated) => {
     try {
-      await atualizarPapel(updated.id, updated.role);
+      if (updated.entityType === "invitation") {
+        await atualizarPapelConvite(updated.invitationId, updated.role);
+      } else {
+        await atualizarPapel(updated.profileId || updated.id, updated.role);
+        // WhatsApp só é editável em profiles (a RPC/helper escrevem em `profiles`).
+        // Persiste apenas quando mudou para evitar escrita à toa.
+        if ((updated.telefone ?? "") !== (editUser?.telefone ?? "")) {
+          const { error } = await atualizarTelefone(updated.profileId || updated.id, updated.telefone);
+          if (error) throw error;
+        }
+      }
       toast.success("Acesso atualizado.");
       refetch();
     } catch (e) { toast.error(e?.message || "Erro ao atualizar acesso"); }
   };
 
-  const handleRemove = async (id) => {
+  const handleRemove = async (user) => {
     try {
-      await removerUsuario(id);
-      toast.success("Usuário removido.");
+      if (user.entityType === "invitation") {
+        await removerConvite(user.invitationId);
+        toast.success("Convite removido.");
+      } else {
+        await removerUsuario(user.profileId || user.id);
+        toast.success("Usuário removido.");
+      }
       refetch();
     } catch (e) { toast.error(e?.message || "Erro ao remover usuário"); }
   };
