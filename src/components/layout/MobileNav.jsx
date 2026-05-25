@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Shield, Users, TrendingUp, PlusCircle } from "lucide-react";
+import { visibleNavItems } from "@/lib/features";
 
 const NAV_ITEMS = [
   { path: "/dashboard",    label: "Dashboard",  icon: LayoutDashboard },
@@ -16,7 +17,7 @@ export default function MobileNav() {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border px-4 pb-safe">
       <div className="flex">
-        {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+        {visibleNavItems(NAV_ITEMS).map(({ path, label, icon: Icon }) => {
           const isActive = pathname === path;
           return (
             <Link

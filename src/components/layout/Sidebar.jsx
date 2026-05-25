@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle, CheckCircle2, BarChart3, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
+import { visibleNavItems } from "@/lib/features";
 
 const initials = (name = "") =>
   name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "·";
@@ -36,7 +37,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV_ITEMS.map(({ path, label, icon: Icon }) => {
+        {visibleNavItems(NAV_ITEMS).map(({ path, label, icon: Icon }) => {
           const isActive = pathname === path;
           return (
             <Link

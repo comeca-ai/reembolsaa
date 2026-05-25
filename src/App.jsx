@@ -6,6 +6,7 @@ import PageNotFound from './components/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { phoneGateSkipped } from '@/lib/telefone';
+import { MOCK_MODULES_ENABLED } from '@/lib/features';
 import AppShell from './components/layout/AppShell';
 import DashboardPage from './pages/DashboardPage';
 import PolicyPage from './pages/PolicyPage';
@@ -96,12 +97,13 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/politica" element={<PolicyPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
-        <Route path="/alertas/:id" element={<ViolationDetailPage />} />
-        <Route path="/financeiro" element={<FinancialPage />} />
         <Route path="/nova-despesa" element={<NewExpensePage />} />
         <Route path="/aprovacoes" element={<ApprovalPage />} />
-        <Route path="/relatorios" element={<ReportsPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
+        {/* Módulos ainda mock: escondidos até integração real (lib/features). */}
+        <Route path="/alertas/:id" element={MOCK_MODULES_ENABLED ? <ViolationDetailPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/financeiro" element={MOCK_MODULES_ENABLED ? <FinancialPage /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/relatorios" element={MOCK_MODULES_ENABLED ? <ReportsPage /> : <Navigate to="/dashboard" replace />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
