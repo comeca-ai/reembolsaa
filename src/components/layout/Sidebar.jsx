@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Shield, Users, ChevronRight, TrendingUp, PlusCircle, CheckCircle2, BarChart3, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, ChevronRight, TrendingUp, PlusCircle, CheckCircle2, BarChart3, Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import { visibleNavItems } from "@/lib/features";
@@ -14,8 +14,6 @@ const NAV_ITEMS = [
   { path: "/aprovacoes",   label: "Aprovações",   icon: CheckCircle2 },
   { path: "/relatorios",   label: "Relatórios",   icon: BarChart3 },
   { path: "/financeiro",   label: "Financeiro",   icon: TrendingUp },
-  { path: "/politica",     label: "Política",     icon: Shield },
-  { path: "/usuarios",     label: "Usuários",     icon: Users },
   { path: "/configuracoes",label: "Configurações", icon: Settings },
 ];
 

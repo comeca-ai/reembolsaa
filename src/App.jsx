@@ -5,12 +5,11 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation }
 import PageNotFound from './components/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import ChatwootWidget from '@/components/ChatwootWidget';
 import { phoneGateSkipped } from '@/lib/telefone';
 import { MOCK_MODULES_ENABLED } from '@/lib/features';
 import AppShell from './components/layout/AppShell';
 import DashboardPage from './pages/DashboardPage';
-import PolicyPage from './pages/PolicyPage';
-import UsersPage from './pages/UsersPage';
 import ViolationDetailPage from './pages/ViolationDetailPage';
 import FinancialPage from './pages/FinancialPage';
 import NewExpensePage from './pages/NewExpensePage';
@@ -95,11 +94,15 @@ const AppRoutes = () => {
       {/* App protegido (sessão + empresa) */}
       <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/politica" element={<PolicyPage />} />
-        <Route path="/usuarios" element={<UsersPage />} />
         <Route path="/nova-despesa" element={<NewExpensePage />} />
         <Route path="/aprovacoes" element={<ApprovalPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
+        {/* Política e Usuários viraram abas de Configurações. As rotas seguem
+            válidas para deep-link e — importante — preservam o location.state que
+            o onboarding usa (/comecar/politica navega para /politica com as regras
+            extraídas, que abrem o modal de revisão na aba Política). */}
+        <Route path="/politica" element={<SettingsPage initialTab="politica" />} />
+        <Route path="/usuarios" element={<SettingsPage initialTab="usuarios" />} />
         {/* Módulos ainda mock: escondidos até integração real (lib/features). */}
         <Route path="/alertas/:id" element={MOCK_MODULES_ENABLED ? <ViolationDetailPage /> : <Navigate to="/dashboard" replace />} />
         <Route path="/financeiro" element={MOCK_MODULES_ENABLED ? <FinancialPage /> : <Navigate to="/dashboard" replace />} />
@@ -115,6 +118,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        {/* Chat (Chatwoot) com inbox por contexto de auth. Dentro do AuthProvider
+            (precisa de useAuth); não precisa do Router. */}
+        <ChatwootWidget />
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <AppRoutes />

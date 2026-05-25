@@ -1,14 +1,12 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Shield, Users, TrendingUp, PlusCircle } from "lucide-react";
+import { LayoutDashboard, TrendingUp, PlusCircle } from "lucide-react";
 import { visibleNavItems } from "@/lib/features";
 
 const NAV_ITEMS = [
   { path: "/dashboard",    label: "Dashboard",  icon: LayoutDashboard },
   { path: "/nova-despesa", label: "Despesa",    icon: PlusCircle },
   { path: "/financeiro",   label: "Financeiro", icon: TrendingUp },
-  { path: "/politica",     label: "Política",   icon: Shield },
-  { path: "/usuarios",     label: "Usuários",   icon: Users },
 ];
 
 export default function MobileNav() {

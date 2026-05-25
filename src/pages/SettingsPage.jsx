@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Settings, Layers, Briefcase, Building2 } from "lucide-react";
+import { Settings, Layers, Briefcase, Building2, Shield, Users } from "lucide-react";
 import TagManager from "@/components/settings/TagManager";
 import CompanySettings from "@/components/settings/CompanySettings";
+import PolicyTab from "@/components/settings/PolicyTab";
+import UsersTab from "@/components/settings/UsersTab";
 
 // ─── Initial tag data ──────────────────────────────────────────────
 const INITIAL_SECTORS = [
@@ -27,12 +29,19 @@ const INITIAL_ROLES = [
 ];
 
 const TABS = [
-  { id: "tags",    label: "Tags e Categorias", icon: Layers },
-  { id: "company", label: "Empresa",           icon: Building2 },
+  { id: "tags",     label: "Tags e Categorias", icon: Layers },
+  { id: "company",  label: "Empresa",           icon: Building2 },
+  { id: "politica", label: "Política",          icon: Shield },
+  { id: "usuarios", label: "Usuários",          icon: Users },
 ];
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("tags");
+const VALID_TABS = TABS.map((t) => t.id);
+
+// `initialTab` permite abrir direto numa aba via rota (ex.: /politica, /usuarios).
+export default function SettingsPage({ initialTab = "tags" }) {
+  const [activeTab, setActiveTab] = useState(
+    VALID_TABS.includes(initialTab) ? initialTab : "tags"
+  );
   const [sectors, setSectors] = useState(INITIAL_SECTORS);
   const [roles, setRoles] = useState(INITIAL_ROLES);
 
@@ -64,7 +73,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <h1 className="font-heading text-foreground text-2xl md:text-3xl">Configurações</h1>
-              <p className="text-muted-foreground text-sm">Gerencie setores, cargos e dados da empresa</p>
+              <p className="text-muted-foreground text-sm">Gerencie setores, cargos, política de reembolso, usuários e dados da empresa</p>
             </div>
           </div>
         </motion.div>
@@ -115,6 +124,10 @@ export default function SettingsPage() {
           )}
 
           {activeTab === "company" && <CompanySettings />}
+
+          {activeTab === "politica" && <PolicyTab />}
+
+          {activeTab === "usuarios" && <UsersTab />}
         </motion.div>
 
       </div>

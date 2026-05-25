@@ -3,7 +3,6 @@ import { Users, UserPlus, Search, X, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -62,7 +61,9 @@ function toUser(p) {
   };
 }
 
-export default function UsersPage() {
+// Conteúdo de gestão de usuários como aba de Configurações (sem layout de página
+// próprio). Mantém convite/listagem/edição/import e todos os modais.
+export default function UsersTab() {
   const queryClient = useQueryClient();
   const { data: profiles = [], isLoading } = useQuery({ queryKey: ["profiles"], queryFn: listProfiles });
   const users = useMemo(() => profiles.map(toUser), [profiles]);
@@ -168,151 +169,123 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
-
-        {/* Page header */}
-        <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-8"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <h1 className="font-heading text-foreground text-2xl md:text-3xl">
-                  Usuários
-                </h1>
-              </div>
-              <p className="text-muted-foreground text-sm md:text-base max-w-2xl ml-[52px]">
-                Gerencie quem tem acesso ao Reembolsaaí, seus papéis e departamentos.
-              </p>
-            </div>
-
-            <div className="flex gap-2 shrink-0 mt-1">
-              <Button
-                variant="outline"
-                onClick={() => setImportOpen(true)}
-                className="font-semibold text-sm gap-2"
-              >
-                <Upload className="w-4 h-4" />
-                <span className="hidden sm:inline">Importar CSV</span>
-              </Button>
-              <Button
-                onClick={() => setInviteOpen(true)}
-                className="font-semibold text-sm gap-2"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span className="hidden sm:inline">Convidar</span>
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Stats */}
-        <UsersStatsBar users={users} />
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
-          className="flex flex-col sm:flex-row gap-2.5 mb-4"
-        >
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              className="pl-9 bg-card border-border text-sm"
-              placeholder="Buscar por nome, e-mail ou departamento…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="flex gap-2 shrink-0">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="bg-card border-border text-sm w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {STATUS_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value} className="text-sm">{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={filterRole} onValueChange={setFilterRole}>
-              <SelectTrigger className="bg-card border-border text-sm w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {ROLE_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value} className="text-sm">{o.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {hasFilters && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={clearFilters}
-                className="shrink-0 text-muted-foreground hover:text-foreground"
-                title="Limpar filtros"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Result count */}
-        {hasFilters && (
-          <p className="text-xs text-muted-foreground mb-3">
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+    <div className="space-y-6">
+      {/* Cabeçalho da seção + ações */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="font-heading text-foreground text-lg">Usuários</h2>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            Gerencie quem tem acesso ao Reembolsaaí, seus papéis e departamentos.
           </p>
-        )}
+        </div>
 
-        {/* Table / empty state */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="w-6 h-6 animate-spin" />
-          </div>
-        ) : filtered.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
+        <div className="flex gap-2 shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => setImportOpen(true)}
+            className="font-semibold text-sm gap-2"
           >
-            <UsersTable
-              users={filtered}
-              onEdit={handleEdit}
-              onRemove={handleRemove}
-              onResendInvite={handleResendInvite}
-            />
-          </motion.div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
-              <Users className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-foreground font-medium mb-1">Nenhum usuário encontrado</p>
-            <p className="text-muted-foreground text-sm mb-5">
-              {hasFilters ? "Tente ajustar os filtros." : "Convide o primeiro colaborador para começar."}
-            </p>
-            {!hasFilters && (
-              <Button onClick={() => setInviteOpen(true)} className="gap-2 font-semibold text-sm">
-                <UserPlus className="w-4 h-4" />
-                Convidar colaborador
-              </Button>
-            )}
-          </div>
-        )}
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Importar CSV</span>
+          </Button>
+          <Button
+            onClick={() => setInviteOpen(true)}
+            className="font-semibold text-sm gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span className="hidden sm:inline">Convidar</span>
+          </Button>
+        </div>
       </div>
+
+      {/* Stats */}
+      <UsersStatsBar users={users} />
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            className="pl-9 bg-card border-border text-sm"
+            placeholder="Buscar por nome, e-mail ou departamento…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex gap-2 shrink-0">
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="bg-card border-border text-sm w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border">
+              {STATUS_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className="text-sm">{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={filterRole} onValueChange={setFilterRole}>
+            <SelectTrigger className="bg-card border-border text-sm w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border">
+              {ROLE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className="text-sm">{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={clearFilters}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Limpar filtros"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Result count */}
+      {hasFilters && (
+        <p className="text-xs text-muted-foreground">
+          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+        </p>
+      )}
+
+      {/* Table / empty state */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20 text-muted-foreground">
+          <Loader2 className="w-6 h-6 animate-spin" />
+        </div>
+      ) : filtered.length > 0 ? (
+        <UsersTable
+          users={filtered}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+          onResendInvite={handleResendInvite}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
+            <Users className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <p className="text-foreground font-medium mb-1">Nenhum usuário encontrado</p>
+          <p className="text-muted-foreground text-sm mb-5">
+            {hasFilters ? "Tente ajustar os filtros." : "Convide o primeiro colaborador para começar."}
+          </p>
+          {!hasFilters && (
+            <Button onClick={() => setInviteOpen(true)} className="gap-2 font-semibold text-sm">
+              <UserPlus className="w-4 h-4" />
+              Convidar colaborador
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Modals */}
       <InviteModal

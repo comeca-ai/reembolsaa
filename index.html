@@ -22,23 +22,7 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-
-    <!-- Chatwoot — widget de chat de atendimento/vendas ("Fale conosco no chat"). -->
-    <script>
-      window.chatwootSettings = { position: "right", type: "standard", launcherTitle: "Fale conosco no chat" };
-      (function (d, t) {
-        var BASE_URL = "https://chatwoot-production-1e1f.up.railway.app";
-        var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-        g.src = BASE_URL + "/packs/js/sdk.js";
-        g.async = true;
-        s.parentNode.insertBefore(g, s);
-        g.onload = function () {
-          window.chatwootSDK.run({
-            websiteToken: "xbc97LYPu1mLoxNeeEiLkUei",
-            baseUrl: BASE_URL,
-          });
-        };
-      })(document, "script");
-    </script>
+    <!-- Chatwoot é montado pelo React (src/components/ChatwootWidget.jsx) com o
+         inbox certo por contexto de auth: vendas (deslogado) x suporte (logado). -->
   </body>
 </html>
