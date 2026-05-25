@@ -27,6 +27,7 @@ export default function PolicyPage() {
   const [modalRules, setModalRules] = useState([]);
   const [resumo, setResumo] = useState("");
   const [policyTexto, setPolicyTexto] = useState("");
+  const [validacao, setValidacao] = useState(null);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +39,7 @@ export default function PolicyPage() {
       setModalRules(st.pendingRules);
       setResumo(st.resumo || "");
       setPolicyTexto(st.politicaTexto || "");
+      setValidacao(st.validacao || null);
       setModalOpen(true);
       navigate(location.pathname, { replace: true, state: {} }); // limpa o state
     }
@@ -55,9 +57,10 @@ export default function PolicyPage() {
       await supabase.storage.from("politicas").upload(path, file, { upsert: false });
       await supabase.from("empresa").update({ politica_documento: path }).eq("id", empresa.id);
 
-      const { rules, resumo: r, politica_texto } = await extrairPolitica(file);
+      const { rules, resumo: r, politica_texto, validacao: val } = await extrairPolitica(file, empresa);
+      setValidacao(val || null);
       if (!rules.length) {
-        setError("Não consegui extrair regras automaticamente deste PDF.");
+        setError(val?.avisos?.[0] || "Não consegui extrair regras automaticamente deste PDF. Confira se é a política de reembolso da sua empresa.");
         return;
       }
       setModalRules(rules);
@@ -166,6 +169,7 @@ export default function PolicyPage() {
         onClose={() => setModalOpen(false)}
         rules={modalRules}
         resumo={resumo}
+        validacao={validacao}
         onChange={updateModalRule}
         onSave={handleSaveRules}
         saving={saving}

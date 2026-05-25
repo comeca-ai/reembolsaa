@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, AlertTriangle } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -14,7 +14,8 @@ const CAT_EMOJI = {
   "Outros": "📦",
 };
 
-export default function ExtractedRulesModal({ open, onClose, rules = [], resumo, onChange, onSave, saving, error }) {
+export default function ExtractedRulesModal({ open, onClose, rules = [], resumo, validacao, onChange, onSave, saving, error }) {
+  const avisos = validacao?.avisos || [];
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
@@ -27,6 +28,18 @@ export default function ExtractedRulesModal({ open, onClose, rules = [], resumo,
             {resumo || "Revise os limites por categoria identificados pela IA e ajuste se necessário antes de ativar."}
           </DialogDescription>
         </DialogHeader>
+
+        {avisos.length > 0 && (
+          <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 flex gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              {avisos.map((a, i) => (
+                <p key={i} className="text-xs text-foreground leading-relaxed">{a}</p>
+              ))}
+              <p className="text-[11px] text-muted-foreground">Você ainda pode salvar — confirme se é a política correta da sua empresa.</p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3 overflow-y-auto pr-1 -mr-1 py-1">
           {rules.length === 0 ? (

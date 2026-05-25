@@ -11,10 +11,13 @@ function fileToBase64(file) {
 }
 
 // Chama a Edge Function que lê o PDF (OCR/IA via OpenRouter) e devolve as regras.
-export async function extrairPolitica(file) {
+// `empresa` ({ nome, cnpj }) é enviada para a função validar se o documento é mesmo
+// uma política de reembolso E se pertence a esta empresa (ver `validacao` no retorno).
+export async function extrairPolitica(file, empresa) {
   const fileBase64 = await fileToBase64(file);
+  const empresaCtx = empresa ? { nome: empresa.nome ?? null, cnpj: empresa.cnpj ?? null } : null;
   const { data, error } = await supabase.functions.invoke('extrair-politica', {
-    body: { fileBase64, filename: file.name },
+    body: { fileBase64, filename: file.name, empresa: empresaCtx },
   });
   if (error) {
     // Mensagem de erro da função, quando houver
@@ -26,7 +29,12 @@ export async function extrairPolitica(file) {
     throw new Error(detail || 'Falha ao ler a política');
   }
   if (data?.error) throw new Error(data.error);
-  return { rules: data?.rules || [], resumo: data?.resumo || '', politica_texto: data?.politica_texto || '' };
+  return {
+    rules: data?.rules || [],
+    resumo: data?.resumo || '',
+    politica_texto: data?.politica_texto || '',
+    validacao: data?.validacao || null,
+  };
 }
 
 // Salva (upsert) as regras extraídas na tabela politica + o texto completo na empresa.

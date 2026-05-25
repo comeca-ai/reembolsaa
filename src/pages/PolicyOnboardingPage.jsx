@@ -44,13 +44,17 @@ export default function PolicyOnboardingPage() {
       const { error: stErr } = await supabase.storage.from("politicas").upload(path, file, { upsert: false });
       if (stErr) throw stErr;
 
-      const { rules, resumo, politica_texto } = await extrairPolitica(file);
-      await concluirOnboarding(path);
+      const { rules, resumo, politica_texto, validacao } = await extrairPolitica(file, empresa);
 
       if (rules.length) {
-        navigate("/politica", { replace: true, state: { pendingRules: rules, resumo, politicaTexto: politica_texto } });
+        await concluirOnboarding(path);
+        navigate("/politica", { replace: true, state: { pendingRules: rules, resumo, politicaTexto: politica_texto, validacao } });
       } else {
-        navigate("/politica", { replace: true });
+        // Sem regras: o PDF provavelmente não é a política de reembolso desta empresa.
+        // Não conclui o onboarding — mostra o aviso para o usuário subir o arquivo certo.
+        setError(validacao?.avisos?.[0] || "Não consegui extrair regras deste PDF. Confira se é a política de reembolso da sua empresa.");
+        setStage("idle");
+        setBusy(false);
       }
     } catch (err) {
       setError(err?.message || "Falha ao ler a política.");
