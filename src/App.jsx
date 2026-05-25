@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation }
 import PageNotFound from './components/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
+import { phoneGateSkipped } from '@/lib/telefone';
 import AppShell from './components/layout/AppShell';
 import DashboardPage from './pages/DashboardPage';
 import PolicyPage from './pages/PolicyPage';
@@ -18,6 +19,7 @@ import PolicyOnboardingPage from './pages/PolicyOnboardingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import AceitarConvitePage from './pages/AceitarConvitePage';
+import CompletarPerfilPage from './pages/CompletarPerfilPage';
 import ApprovalPage from './pages/ApprovalPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -56,11 +58,14 @@ const PolicyOnboardingRoute = () => {
 // Layout protegido: exige sessão + empresa. Sem empresa -> onboarding;
 // admin sem política configurada -> tela de subir política.
 const ProtectedLayout = () => {
-  const { isAuthenticated, hasEmpresa, needsPolicyOnboarding } = useAuth();
+  const { isAuthenticated, hasEmpresa, needsPolicyOnboarding, needsPhone } = useAuth();
   const location = useLocation();
   if (!isAuthenticated) return <Navigate to="/login" replace state={{ from: location }} />;
   if (!hasEmpresa) return <Navigate to="/comecar" replace />;
   if (needsPolicyOnboarding) return <Navigate to="/comecar/politica" replace />;
+  // Sem WhatsApp salvo (legado) -> completar antes de usar o app. Quem não
+  // consegue salvar (número já em outra conta) pode pular e não fica trancado.
+  if (needsPhone && !phoneGateSkipped()) return <Navigate to="/completar-perfil" replace />;
   return <AppShell />;
 };
 
@@ -77,6 +82,9 @@ const AppRoutes = () => {
       {/* Aceite de convite: o link cria a sessão; o convidado define a senha.
           Não fica sob PublicOnly porque o convite já deixa o usuário logado. */}
       <Route path="/aceitar-convite" element={<AceitarConvitePage />} />
+
+      {/* Gate de perfil: completar WhatsApp (legados sem o número) */}
+      <Route path="/completar-perfil" element={<RequireAuth><CompletarPerfilPage /></RequireAuth>} />
 
       {/* Autenticado, ainda sem empresa */}
       <Route path="/comecar" element={<RequireAuth><OnboardingPage /></RequireAuth>} />

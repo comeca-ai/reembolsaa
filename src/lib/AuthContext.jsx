@@ -6,7 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);   // { id, empresa_id, nome, email, role }
+  const [profile, setProfile] = useState(null);   // { id, empresa_id, nome, email, role, telefone }
   const [empresa, setEmpresa] = useState(null);    // { id, nome, onboarding_done, politica_documento }
   const [loading, setLoading] = useState(true);
   const [authReady, setAuthReady] = useState(false);
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     }
     const { data: prof, error } = await supabase
       .from('profiles')
-      .select('id, empresa_id, nome, email, role')
+      .select('id, empresa_id, nome, email, role, telefone')
       .eq('id', currentUser.id)
       .maybeSingle();
 
@@ -118,6 +118,9 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!session,
     hasEmpresa: !!profile?.empresa_id,
     isAdmin: profile?.role === 'admin',
+    // Usuário já dentro de uma empresa, mas sem WhatsApp salvo (chave de roteamento
+    // de despesas). Cobre os legados — novos cadastros/aceites já exigem o número.
+    needsPhone: !!profile?.empresa_id && !String(profile?.telefone || '').trim(),
     // Admin que ainda não concluiu o onboarding da política vê a tela de upload.
     needsPolicyOnboarding: profile?.role === 'admin' && !!profile?.empresa_id && empresa?.onboarding_done === false,
     signIn,

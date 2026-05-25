@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/AuthContext";
+import { atualizarTelefone } from "@/api/usuarios";
+import { telefoneValido, garantirDDI } from "@/lib/telefone";
 
 export default function SignupPage() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const [form, setForm] = useState({ nome: "", email: "", password: "" });
+  const [form, setForm] = useState({ nome: "", email: "", password: "", telefone: "" });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,6 +23,7 @@ export default function SignupPage() {
     if (!form.nome.trim()) e.nome = "Nome obrigatório";
     if (!form.email.trim()) e.email = "E-mail obrigatório";
     if (form.password.length < 8) e.password = "Mínimo 8 caracteres";
+    if (!telefoneValido(garantirDDI(form.telefone))) e.telefone = "WhatsApp com DDD, ex: (11) 95468-6897";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -34,6 +37,10 @@ export default function SignupPage() {
       const data = await signUp(form.email.trim(), form.password, form.nome.trim());
       if (data.session) {
         // Confirmação de e-mail desativada: já está logado.
+        // Salva o WhatsApp (chave de roteamento de despesas). Best-effort: se o
+        // profile ainda não foi materializado pelo trigger, não bloqueia o cadastro
+        // — o usuário ajusta depois em Configurações.
+        await atualizarTelefone(data.session.user.id, garantirDDI(form.telefone));
         // O guard envia para /comecar (criar empresa) ou /dashboard (entrou via convite).
         navigate("/comecar", { replace: true });
       } else {
@@ -125,6 +132,21 @@ export default function SignupPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
             {errors.password && <p className="text-destructive text-xs">{errors.password}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="telefone" className={errors.telefone ? "text-destructive" : ""}>WhatsApp</Label>
+            <Input
+              id="telefone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="(11) 95468-6897"
+              value={form.telefone}
+              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+            />
+            {errors.telefone
+              ? <p className="text-destructive text-xs">{errors.telefone}</p>
+              : <p className="text-muted-foreground text-xs">Usado para reconhecer despesas enviadas pelo WhatsApp.</p>}
           </div>
 
           {error && <p className="text-destructive text-sm">{error}</p>}

@@ -4,11 +4,12 @@ const ThemeContext = createContext(null);
 
 export const THEME_STORAGE_KEY = "reembolsaa-theme";
 
-// O escuro é o tema padrão da marca; só usamos claro quando o usuário escolhe.
+// O claro é o tema padrão da marca (SaaS B2B clean azul); só usamos escuro quando
+// o usuário escolhe.
 function getInitialTheme() {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return stored === "light" || stored === "dark" ? stored : "dark";
+  return stored === "light" || stored === "dark" ? stored : "light";
 }
 
 export function ThemeProvider({ children }) {

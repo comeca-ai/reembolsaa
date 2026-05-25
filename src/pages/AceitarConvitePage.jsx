@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
+import { atualizarTelefone } from "@/api/usuarios";
+import { telefoneValido, garantirDDI, mensagemErroTelefone } from "@/lib/telefone";
 
 // Tela de aceite do convite: o link do e-mail cria uma sessão (detectSessionInUrl),
 // e aqui o convidado define a senha. O profile já vem ligado à empresa/papel pelo
@@ -16,6 +18,7 @@ export default function AceitarConvitePage() {
   const { session, user, loading, refreshProfile } = useAuth();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -45,14 +48,22 @@ export default function AceitarConvitePage() {
     setError("");
     if (password.length < 8) return setError("A senha precisa de ao menos 8 caracteres.");
     if (password !== confirm) return setError("As senhas não conferem.");
+    const tel = garantirDDI(telefone);
+    if (!telefoneValido(tel)) {
+      return setError("Informe seu WhatsApp com DDD — ex.: (11) 95468-6897. É por ele que suas despesas são reconhecidas.");
+    }
     setSaving(true);
     try {
       const { error: upErr } = await supabase.auth.updateUser({ password });
       if (upErr) throw upErr;
+      // Telefone é a CHAVE de roteamento das despesas por WhatsApp: se não salvar,
+      // o fluxo quebra. Por isso falha aqui é erro, não aviso silencioso.
+      const { error: telErr } = await atualizarTelefone(user.id, tel);
+      if (telErr) throw telErr;
       await refreshProfile();
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err?.message || "Não foi possível definir a senha.");
+      setError(mensagemErroTelefone(err, "Não foi possível definir a senha."));
     } finally {
       setSaving(false);
     }
@@ -107,6 +118,21 @@ export default function AceitarConvitePage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
             />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="telefone">Seu WhatsApp</Label>
+            <Input
+              id="telefone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="(11) 95468-6897"
+              value={telefone}
+              onChange={(e) => setTelefone(e.target.value)}
+            />
+            <p className="text-muted-foreground text-xs">
+              É por este número que o Reembolsaaí reconhece as despesas que você enviar pelo WhatsApp.
+            </p>
           </div>
 
           {error && <p className="text-destructive text-sm">{error}</p>}
