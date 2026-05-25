@@ -45,4 +45,3 @@ validacao: {
 - Subir política de outra empresa (nome/CNPJ diferente) → banner de `mismatch`, mas salvar permitido.
 - Subir política correta → sem aviso; fluxo normal de revisão/salvar.
 - Função redeployada com `verify_jwt: true`; front redeployado.
-```
