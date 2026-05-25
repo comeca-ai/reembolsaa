@@ -112,4 +112,6 @@ Foco: cobrir o que entrou agora e está SEM teste. Não toque nos arquivos "Clau
 2. **Lógica do gate**: testar `needsPhone` (empresa sem telefone = true; com telefone = false; sem empresa = false).
 3. **QA manual** das telas que são suas (mapa seção 2) na produção `reembolsaa.vercel.app` (login `jer@datarisk.io`).
 4. **DoD antes de declarar pronto:** `npm run lint` + `npm test` + `npm run build` verdes. Anote resultado aqui no log.
+- _(Claude)_ **Fase 3 (persistência) — CompanySettings ✅ REAL:** migração `20260525_empresa_dados_cadastrais` (colunas `cnpj`,`email_financeiro`,`moeda`,`inicio_ano_fiscal`; RLS `empresa_admin_update` já existia). AuthContext lê os campos; novo `src/api/empresa.js` (`getEmpresa`/`atualizarEmpresa`); `CompanySettings.jsx` carrega empresa real + salva + `refreshProfile`. Antes era 100% mock ("Construtec Brasil"). Lint/30 testes/build verdes.
+- _(Claude)_ **Pendente da Fase 3/4 — bom pro Codex** (mock/persistência que ainda falta): `SettingsPage.jsx` `sectors`/`roles` + `TagManager.jsx` = `useState` local (precisa tabelas `setor`/`cargo` por empresa + API + wiring); Fase 4: `FinancialPage`/`ReportsPage`/`ViolationDetailPage` usam `src/lib/mocks/*` → integrar ou **esconder rota** até pronto (item do gate de sobrevivência "nada mock em rota de produção").
 - _(Codex)_ …

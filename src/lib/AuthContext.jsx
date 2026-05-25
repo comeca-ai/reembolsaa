@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     if (prof?.empresa_id) {
       const { data: emp } = await supabase
         .from('empresa')
-        .select('id, nome, onboarding_done, politica_documento, politica_texto')
+        .select('id, nome, onboarding_done, politica_documento, politica_texto, cnpj, email_financeiro, moeda, inicio_ano_fiscal')
         .eq('id', prof.empresa_id)
         .maybeSingle();
       setEmpresa(emp || null);
