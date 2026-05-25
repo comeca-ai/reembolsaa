@@ -104,4 +104,12 @@ Hoje o telefone do colaborador só é capturado pelo admin (opcional) no `Invite
 - _(Claude)_ **GATE de WhatsApp** ✅ `CompletarPerfilPage.jsx` + `needsPhone` no AuthContext + redirect no `ProtectedLayout` (App.jsx). AuthContext agora seleciona `telefone`. Build verde + 30 testes. **P0 COMPLETO.**
 - _(Claude)_ Arquivos que toquei (NÃO mexer sem avisar): `lib/telefone.js`, `lib/AuthContext.jsx`, `lib/ThemeContext.jsx`, `index.html`, `index.css`, `App.jsx`, `pages/{AceitarConvite,Signup,CompletarPerfil}Page.jsx`.
 - _(Claude)_ **Bug do índice único de telefone tratado:** `uq_profiles_telefone_ult11` é global (1 nº → 1 conta). Antes a tela crashava com erro cru do Postgres e o gate trancava quem tem nº já usado. Agora: `mensagemErroTelefone`/`isTelefoneDuplicado`/`skipPhoneGate` em `lib/telefone.js`; gate mostra msg amigável + "entrar mesmo assim" (sessionStorage) e `ProtectedLayout` respeita o skip; aceite usa msg amigável. **Achado de dado:** usuário tem 2 contas (gmail c/ telefone, jer@datarisk.io sem) — número 5511954686897 já está na do gmail; decisão de qual conta fica com o nº pendente com o usuário.
+- _(Claude)_ **DEPLOY 25/05:** commit `5058a01` pushado em `origin/tech-lead-cleanup`; produção na Vercel (`reembolsaa.vercel.app`, dpl `DgBym1XBb1j3emYKWr326kCJrrQ5`, READY). Smoke OK: tema claro live, nossa versão Supabase, gate no bundle. Lint/30 testes/build verdes. **E2E WhatsApp PROVADO:** despesa `DR-95BB8CAB7F` (R$156, Alimentação, canal=whatsapp, pendente) roteou pro número → Datarisk.
+
+## 🧪 PEDIDO AO CODEX — TESTES (ajuda solicitada pelo usuário 25/05)
+Foco: cobrir o que entrou agora e está SEM teste. Não toque nos arquivos "Claude" exceto criando arquivos `*.test.js` novos.
+1. **Unit (Vitest) para `src/lib/telefone.js`** — funções novas sem cobertura: `garantirDDI` (10/11 díg → prepend 55; já-com-DDI e fora-do-padrão inalterados), `isTelefoneDuplicado` (code `23505` e regex do nome do índice), `mensagemErroTelefone` (duplicado → msg fixa; outro erro → message/fallback; null → null), `phoneGateSkipped`/`skipPhoneGate` (sessionStorage).
+2. **Lógica do gate**: testar `needsPhone` (empresa sem telefone = true; com telefone = false; sem empresa = false).
+3. **QA manual** das telas que são suas (mapa seção 2) na produção `reembolsaa.vercel.app` (login `jer@datarisk.io`).
+4. **DoD antes de declarar pronto:** `npm run lint` + `npm test` + `npm run build` verdes. Anote resultado aqui no log.
 - _(Codex)_ …
