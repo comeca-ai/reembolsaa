@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { CATEGORIAS, limiteCategoria, avaliarLimite } from '@/lib/policy';
+import { validarChaveFiscal } from '@/lib/nf-chave';
 
 // Reexporta a lógica pura de política (mantém os imports existentes via @/api/despesas).
 export { CATEGORIAS, limiteCategoria, avaliarLimite };
@@ -29,12 +30,20 @@ export async function listPoliticas() {
 }
 
 // Cria uma despesa no tenant. Calcula policy_kind/excesso vs. a política da categoria.
-export async function createDespesa({ empresaId, userId, colaborador, centro_custo, categoria, valor_brl, data, observacao, comprovante, politicas = [], bloqueado = false, motivos = [] }) {
+export async function createDespesa({ empresaId, userId, colaborador, centro_custo, categoria, valor_brl, data, observacao, comprovante, chave, cnpj, politicas = [], bloqueado = false, motivos = [] }) {
   const { limite, acima, excesso } = avaliarLimite({ categoria, valor_brl, politicas });
 
-  // Aprovação automática só quando dentro do limite E sem violação qualitativa
-  // (ex.: bebida alcoólica). Caso contrário, vai para análise.
-  const precisaRevisar = acima || bloqueado;
+  // Selo de autenticidade fiscal (offline): valida formato + dígito verificador da
+  // chave e cruza o CNPJ. Uma chave suspeita/inválida bloqueia a auto-aprovação.
+  const selo = validarChaveFiscal(chave, cnpj);
+  const nfSuspeita = selo.selo === 'suspeita';
+  const motivosFinais = nfSuspeita
+    ? [...motivos, 'Comprovante com chave fiscal suspeita/inválida']
+    : motivos;
+
+  // Aprovação automática só quando dentro do limite, sem violação qualitativa
+  // (ex.: bebida alcoólica) E sem chave fiscal suspeita. Caso contrário, vai para análise.
+  const precisaRevisar = acima || bloqueado || nfSuspeita;
   const status = precisaRevisar ? 'pendente' : 'aprovada-n1';
 
   const payload = {
@@ -51,6 +60,9 @@ export async function createDespesa({ empresaId, userId, colaborador, centro_cus
     policy_kind: acima ? 'acima' : 'dentro',
     policy_excesso_brl: excesso,
     ia: precisaRevisar ? 'revisar' : (comprovante ? 'auto' : 'manual'),
+    nf_chave: selo.chave,
+    nf_selo: selo.selo,
+    nf_modelo: selo.modelo,
   };
 
   const { data: row, error } = await supabase.from('despesa').insert(payload).select().single();
@@ -62,10 +74,10 @@ export async function createDespesa({ empresaId, userId, colaborador, centro_cus
     evento: precisaRevisar ? 'criada' : 'aprovada-n1',
     canal: precisaRevisar ? 'web' : 'automatico',
     ator: precisaRevisar ? colaborador : 'Política (automático)',
-    dados: { valor_brl, categoria, policy_kind: payload.policy_kind, limite, excesso: payload.policy_excesso_brl, bloqueado, motivos },
+    dados: { valor_brl, categoria, policy_kind: payload.policy_kind, limite, excesso: payload.policy_excesso_brl, bloqueado, motivos: motivosFinais, nf_selo: selo.selo },
   });
 
-  return { ...row, _acima: acima, _bloqueado: bloqueado, _motivos: motivos, _limite: limite };
+  return { ...row, _acima: acima, _bloqueado: bloqueado || nfSuspeita, _motivos: motivosFinais, _limite: limite };
 }
 
 // Lê um File como data URL base64.
@@ -93,7 +105,7 @@ export async function extrairRecibo(file) {
     throw new Error(detail || 'Falha ao ler o comprovante');
   }
   if (data?.error) throw new Error(data.error);
-  return data; // { fornecedor, valor_brl, data, categoria, descricao }
+  return data; // { fornecedor, valor_brl, data, categoria, descricao, chave_acesso, cnpj }
 }
 
 // Sobe o comprovante para o Storage isolado por empresa; retorna o path.

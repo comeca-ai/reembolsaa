@@ -15,8 +15,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const PROMPT = `Você é um assistente de OCR de despesas. Analise o comprovante/nota fiscal/cupom anexado e extraia os dados.
 Retorne SOMENTE JSON válido:
-{"colaborador":"nome do funcionário se aparecer escrito no comprovante, senão null","fornecedor":"estabelecimento ou null","valor_brl":valor_total_em_reais_numero_ou_null,"data":"YYYY-MM-DD ou null","categoria":"uma de: Alimentação, Transporte, Hospedagem, KM, Outros","descricao":"breve","itens":[{"nome":"item","valor":numero_ou_null}]}
-Extraia TODOS os itens consumíveis visíveis (cada bebida, prato, produto). valor_brl é o TOTAL. Se faltar um campo, use null. Não invente.`;
+{"colaborador":"nome do funcionário se aparecer escrito no comprovante, senão null","fornecedor":"estabelecimento ou null","cnpj":"CNPJ do emitente, só dígitos, ou null","valor_brl":valor_total_em_reais_numero_ou_null,"data":"YYYY-MM-DD ou null","categoria":"uma de: Alimentação, Transporte, Hospedagem, KM, Outros","chave_acesso":"chave de acesso da NF-e/NFC-e: os 44 dígitos do código de barras/QR/rodapé, só dígitos, ou null se não houver","descricao":"breve","itens":[{"nome":"item","valor":numero_ou_null}]}
+Extraia TODOS os itens consumíveis visíveis (cada bebida, prato, produto). valor_brl é o TOTAL. A chave_acesso só existe em NF-e/NFC-e (cupom eletrônico com QR); cupom antigo de ECF NÃO tem — nesse caso use null. Se faltar um campo, use null. Não invente.`;
 
 function numOrNull(v: unknown): number | null {
   if (typeof v === "string") v = v.replace(/[^0-9.,]/g, "").replace(/\.(?=\d{3}\b)/g, "").replace(",", ".");
@@ -31,7 +31,9 @@ function parse(text: string) {
     const categoria = ALLOWED.includes(o.categoria) ? o.categoria : "Outros";
     const data = typeof o.data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.data) ? o.data : null;
     const itens = Array.isArray(o.itens) ? o.itens.slice(0, 40).map((it: any) => ({ nome: typeof it?.nome === "string" ? it.nome.slice(0, 120) : String(it?.nome || "").slice(0, 120), valor: numOrNull(it?.valor) })).filter((it: any) => it.nome) : [];
-    return { colaborador: typeof o.colaborador === "string" ? o.colaborador.slice(0, 120) : null, fornecedor: typeof o.fornecedor === "string" ? o.fornecedor.slice(0, 120) : null, valor_brl: numOrNull(o.valor_brl), data, categoria, descricao: typeof o.descricao === "string" ? o.descricao.slice(0, 200) : null, itens };
+    const cnpj = (typeof o.cnpj === "string" ? o.cnpj : "").replace(/\D/g, "").slice(0, 14) || null;
+    const chave_acesso = (typeof o.chave_acesso === "string" ? o.chave_acesso : "").replace(/\D/g, "").slice(0, 44) || null;
+    return { colaborador: typeof o.colaborador === "string" ? o.colaborador.slice(0, 120) : null, fornecedor: typeof o.fornecedor === "string" ? o.fornecedor.slice(0, 120) : null, cnpj, chave_acesso, valor_brl: numOrNull(o.valor_brl), data, categoria, descricao: typeof o.descricao === "string" ? o.descricao.slice(0, 200) : null, itens };
   } catch (_) { return null; }
 }
 function json(obj: unknown, status = 200) {

@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listDespesas, decidirDespesa, STATUS_LABELS } from "@/api/despesas";
 import { useAuth } from "@/lib/AuthContext";
+import NfSeloBadge from "@/components/NfSeloBadge";
 
 const STATUS_TABS = [
   { key: "pending", label: "Pendentes" },
@@ -187,6 +188,7 @@ export default function ApprovalPage() {
                                 {STATUS_LABELS[d.status]}
                               </span>
                             )}
+                            <NfSeloBadge selo={d.nf_selo} />
                           </div>
                           <div className="flex flex-wrap items-center gap-4 mt-2">
                             <span className="font-mono text-sm text-foreground font-semibold">

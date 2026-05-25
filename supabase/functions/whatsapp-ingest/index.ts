@@ -55,8 +55,28 @@ async function openrouter(messages: any[], plugins?: any[], modelsList?: string[
 
 const OCR_PROMPT = `Você é um OCR de comprovantes de despesa. Leia a imagem e extraia os dados. O valor total geralmente aparece como TOTAL/VALOR ou é a soma dos itens. SEMPRE tente retornar valor_brl.
 Responda SOMENTE JSON:
-{"colaborador":"nome do funcionário se escrito, senão null","fornecedor":"estabelecimento ou null","valor_brl":numero_total_ou_null,"data":"YYYY-MM-DD ou null","categoria":"Alimentação|Transporte|Hospedagem|KM|Outros","descricao":"breve","itens":[{"nome":"item","valor":numero_ou_null}]}
-Não invente.`;
+{"colaborador":"nome do funcionário se escrito, senão null","fornecedor":"estabelecimento ou null","cnpj":"CNPJ do emitente, só dígitos, ou null","valor_brl":numero_total_ou_null,"data":"YYYY-MM-DD ou null","categoria":"Alimentação|Transporte|Hospedagem|KM|Outros","chave_acesso":"chave de acesso da NF-e/NFC-e (44 dígitos do código de barras/QR/rodapé, só dígitos) ou null se não houver","descricao":"breve","itens":[{"nome":"item","valor":numero_ou_null}]}
+A chave_acesso só existe em NF-e/NFC-e (cupom eletrônico com QR); cupom antigo de ECF não tem — use null. Não invente.`;
+
+// Validação OFFLINE da chave fiscal (espelho de src/lib/nf-chave.js — manter em sincronia).
+function dvChaveAcesso(chave43: string): number {
+  const d = chave43.replace(/\D/g, "").slice(0, 43);
+  let peso = 2, soma = 0;
+  for (let i = d.length - 1; i >= 0; i--) { soma += parseInt(d[i], 10) * peso; peso = peso === 9 ? 2 : peso + 1; }
+  const resto = soma % 11;
+  return resto <= 1 ? 0 : 11 - resto;
+}
+function validarChaveFiscal(chaveRaw: unknown, cnpjCupomRaw: unknown): { selo: string; chave: string | null; modelo: string | null } {
+  const chave = String(chaveRaw ?? "").replace(/\D/g, "");
+  if (!chave) return { selo: "nao_verificavel", chave: null, modelo: null };
+  if (chave.length !== 44) return { selo: "suspeita", chave, modelo: null };
+  const modelo = chave.slice(20, 22);
+  const cnpjChave = chave.slice(6, 20);
+  if (String(dvChaveAcesso(chave)) !== chave.slice(43, 44)) return { selo: "suspeita", chave, modelo };
+  const cnpjCupom = String(cnpjCupomRaw ?? "").replace(/\D/g, "");
+  if (cnpjCupom.length === 14 && cnpjCupom !== cnpjChave) return { selo: "suspeita", chave, modelo };
+  return { selo: "valida", chave, modelo };
+}
 function limiteCategoria(p: any): number | null { return p ? (p.diario_brl ?? p.por_noite_brl ?? p.teto_mes_brl ?? null) : null; }
 function politicasTexto(politicas: any[]): string { if (!Array.isArray(politicas) || !politicas.length) return ""; return politicas.map((p) => { const lims = [p.diario_brl ? `diário R$ ${p.diario_brl}` : null, p.por_noite_brl ? `por noite R$ ${p.por_noite_brl}` : null, p.teto_mes_brl ? `teto mês R$ ${p.teto_mes_brl}` : null].filter(Boolean).join(", ") || "sem limite"; const r = p.restricoes || (p.documento && p.documento !== "Política padrão" ? p.documento : ""); return `- ${p.categoria}: ${lims}.${r ? ` Restrições: ${r}` : ""}`; }).join("\n"); }
 function analysisPrompt(d: any, politicaTexto: string, politicas: any[]): string { const itens = (d.itens || []).map((it: any) => `  • ${it.nome}${it.valor != null ? ` (R$ ${it.valor})` : ""}`).join("\n") || "  (sem itens)"; const regras = [politicaTexto, politicasTexto(politicas)].filter(Boolean).join("\n\n") || "(sem política)"; return `Você é um AGENTE DE ANÁLISE DE POLÍTICA, criterioso. Decida APROVAR ou REVISAR.
@@ -122,15 +142,16 @@ Deno.serve(async (req: Request) => {
     const pol = (politicas || []).find((p: any) => p.categoria === d.categoria);
     const limite = limiteCategoria(pol);
     const acima = limite != null && Number(d.valor_brl) > Number(limite);
-    const precisaRevisar = acima || verdict.status === "revisar";
+    const selo = validarChaveFiscal(o.chave_acesso, o.cnpj); // autenticidade da chave fiscal (offline)
+    const precisaRevisar = acima || verdict.status === "revisar" || selo.selo === "suspeita";
     const status = precisaRevisar ? "pendente" : "aprovada-n1";
 
     let comprovante: string | null = null;
     try { const ext = imgMime.includes("png") ? "png" : imgMime.includes("pdf") ? "pdf" : imgMime.includes("webp") ? "webp" : imgMime.includes("heic") ? "heic" : "jpg"; const path = `${empresa.id}/${Date.now()}-whatsapp.${ext}`; const up = await supabase.storage.from("comprovantes").upload(path, bytes, { contentType: imgMime, upsert: false }); if (!up.error) comprovante = path; } catch (_) { /* */ }
 
     const colaborador = colaboradorOverride || (d.colaborador && d.colaborador.trim()) || telefone || "WhatsApp";
-    const motivos = [...(acima ? [`Acima do limite de R$ ${limite}`] : []), ...verdict.motivos];
-    const { data: row, error: insErr } = await supabase.from("despesa").insert({ empresa_id: empresa.id, colaborador, centro_custo: "—", categoria: d.categoria, valor_brl: d.valor_brl, data: d.data || new Date().toISOString().slice(0, 10), observacao: [d.descricao, d.fornecedor].filter(Boolean).join(" — ") || null, comprovante, status, canal: "whatsapp", policy_kind: acima ? "acima" : "dentro", policy_excesso_brl: acima ? Number(d.valor_brl) - Number(limite) : null, ia: precisaRevisar ? "revisar" : "auto" }).select().single();
+    const motivos = [...(acima ? [`Acima do limite de R$ ${limite}`] : []), ...(selo.selo === "suspeita" ? ["Comprovante com chave fiscal suspeita/inválida"] : []), ...verdict.motivos];
+    const { data: row, error: insErr } = await supabase.from("despesa").insert({ empresa_id: empresa.id, colaborador, centro_custo: "—", categoria: d.categoria, valor_brl: d.valor_brl, data: d.data || new Date().toISOString().slice(0, 10), observacao: [d.descricao, d.fornecedor].filter(Boolean).join(" — ") || null, comprovante, status, canal: "whatsapp", policy_kind: acima ? "acima" : "dentro", policy_excesso_brl: acima ? Number(d.valor_brl) - Number(limite) : null, ia: precisaRevisar ? "revisar" : "auto", nf_chave: selo.chave, nf_selo: selo.selo, nf_modelo: selo.modelo }).select().single();
     if (insErr) return json({ ok: false, error: insErr.message }, 500);
     await supabase.from("audit_trail").insert({ empresa_id: empresa.id, despesa_id: row.id, evento: precisaRevisar ? "criada" : "aprovada-n1", canal: "whatsapp", ator: colaborador, dados: { valor_brl: d.valor_brl, categoria: d.categoria, status, motivos, raciocinio: verdict.raciocinio } });
 

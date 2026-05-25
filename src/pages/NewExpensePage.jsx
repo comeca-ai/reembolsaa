@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIAS } from "@/api/despesas";
 import { useNewExpense } from "@/hooks/useNewExpense";
+import NfSeloBadge from "@/components/NfSeloBadge";
 
 const brl = (v) => `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -56,6 +57,7 @@ export default function NewExpensePage() {
             <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><span className="font-mono text-foreground">{brl(result.valor_brl)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Categoria</span><span className="text-foreground">{result.categoria}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="text-foreground">{aprovada ? "Aprovada" : "Pendente"}</span></div>
+            <div className="flex justify-between items-center"><span className="text-muted-foreground">Comprovante fiscal</span><NfSeloBadge selo={result.nf_selo} /></div>
           </div>
           <div className="flex gap-2 pt-2">
             <Button variant="outline" className="flex-1" onClick={reset}>

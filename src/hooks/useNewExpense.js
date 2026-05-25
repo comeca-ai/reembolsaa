@@ -100,6 +100,9 @@ export function useNewExpense() {
         data: form.data,
         observacao: form.observacao.trim(),
         comprovante,
+        // Chave de acesso + CNPJ lidos pelo OCR alimentam o selo de autenticidade fiscal.
+        chave: ocr?.chave_acesso,
+        cnpj: ocr?.cnpj,
         politicas,
         bloqueado,
         motivos: motivosIA,
