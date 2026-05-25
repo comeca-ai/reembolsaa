@@ -118,11 +118,11 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        {/* Chat (Chatwoot) com inbox por contexto de auth. Dentro do AuthProvider
-            (precisa de useAuth); não precisa do Router. */}
-        <ChatwootWidget />
         <QueryClientProvider client={queryClientInstance}>
           <Router>
+            {/* Chat (Chatwoot): inbox por contexto de auth (useAuth) e ciente da
+                rota (useLocation) — por isso DENTRO do Router. */}
+            <ChatwootWidget />
             <AppRoutes />
           </Router>
           <Toaster />
