@@ -1,78 +1,78 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
-  CheckCircle2, ArrowRight, Sparkles, FileText,
-  MessageCircle, BarChart3, GitBranch, Clock, TrendingUp,
-  ChevronDown, Building2, AlertTriangle
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  CircleAlert,
+  FileCheck2,
+  MessageCircle,
+  Receipt,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  WalletCards,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthContext";
 
-// ─── DATA ──────────────────────────────────────────────────────────────────────
+const PAINS = [
+  "Planilhas, e-mails e comprovantes espalhados em vários canais.",
+  "Gestores gastando tempo aprovando despesa repetitiva sem contexto.",
+  "Política em PDF que não vira regra operacional no dia a dia.",
+];
 
-const DIFERENCIAIS = [
+const BENEFITS = [
   {
     icon: MessageCircle,
-    badge: "🇧🇷 Inédito no Brasil",
-    highlight: true,
-    title: "WhatsApp Zero-Login",
-    desc: "Funcionário envia foto do comprovante pelo WhatsApp. Sem app, sem cadastro, sem fricção. A IA cuida do resto.",
-  },
-  {
-    icon: FileText,
-    badge: "🇧🇷 Inédito no Brasil",
-    highlight: true,
-    title: "Validação NF-e via SEFAZ",
-    desc: "Chave da nota fiscal verificada em tempo real na base da Receita Federal. Zero fraude de comprovante.",
+    title: "Entrada por WhatsApp ou web",
+    text: "O colaborador envia a despesa no canal mais natural, sem virar especialista em sistema.",
   },
   {
     icon: Sparkles,
-    badge: "🇧🇷 Inédito no Brasil",
-    highlight: true,
-    title: "Agente IA de Compliance",
-    desc: "IA lê sua política em PDF e gera regras estruturadas automaticamente. Aplica em cada despesa, em tempo real.",
+    title: "IA antes da fila humana",
+    text: "Extração, classificação e leitura inicial acontecem antes do aprovador perder tempo.",
   },
   {
-    icon: GitBranch,
-    badge: "Diferencial",
-    highlight: false,
-    title: "Política como Código",
-    desc: "Regras versionadas, auditáveis e editáveis. Toda mudança de política é rastreada — quem alterou, quando e por quê.",
+    icon: ShieldCheck,
+    title: "Política aplicada com consistência",
+    text: "A empresa transforma o PDF em critério operacional e reduz decisão improvisada.",
   },
   {
-    icon: Clock,
-    badge: "Diferencial",
-    highlight: false,
-    title: "Aprovação em segundos",
-    desc: "Despesas dentro da política são aprovadas automaticamente. Gestor só vê o que realmente precisa de atenção.",
-  },
-  {
-    icon: BarChart3,
-    badge: "Diferencial",
-    highlight: false,
-    title: "Dashboard de compliance em tempo real",
-    desc: "Score de conformidade, violações por categoria, evolução histórica. Visão completa para o CFO.",
-  },
-  {
-    icon: Building2,
-    badge: "Enterprise",
-    highlight: false,
-    title: "Multi-tenant com RLS",
-    desc: "Isolamento total entre empresas. Dados de um cliente jamais visíveis para outro — arquitetura Supabase Row-Level Security.",
-  },
-  {
-    icon: TrendingUp,
-    badge: "Diferencial",
-    highlight: false,
-    title: "Relatórios prontos para auditoria",
-    desc: "Exportação com trilha completa: quem submeteu, qual regra foi aplicada, quem aprovou. Pronto para auditores.",
+    icon: FileCheck2,
+    title: "Auditoria pronta",
+    text: "Canal, comprovante, regra aplicada e decisão ficam no mesmo histórico.",
   },
 ];
 
 const STEPS = [
-  { n: "01", title: "Suba sua política", desc: "PDF da política de reembolso da empresa. A IA lê e converte em regras estruturadas automaticamente." },
-  { n: "02", title: "Funcionário envia comprovante", desc: "Pelo WhatsApp ou app web. Foto da nota, cupom ou boleto — sem formulário manual." },
-  { n: "03", title: "IA verifica em tempo real", desc: "Valor, categoria, fornecedor e nota fiscal validada na SEFAZ. Veredito automático em segundos." },
-  { n: "04", title: "Gestor só aprova exceções", desc: "O que está dentro da política é aprovado automaticamente. Foco só no que importa." },
+  {
+    number: "01",
+    title: "Cadastre a empresa",
+    text: "O administrador entra, cria o tenant e inicia o setup do fluxo.",
+  },
+  {
+    number: "02",
+    title: "Suba a política",
+    text: "A IA organiza o PDF em regras revisáveis antes de ativar.",
+  },
+  {
+    number: "03",
+    title: "Receba despesas",
+    text: "Web e WhatsApp entram no mesmo motor de classificação e aprovação.",
+  },
+  {
+    number: "04",
+    title: "Aprove o que importa",
+    text: "A fila humana fica focada nas exceções e não no volume inteiro.",
+  },
+];
+
+const METRICS = [
+  { value: "3 min", label: "para um colaborador enviar a despesa" },
+  { value: "1 fluxo", label: "para onboarding, política, envio e aprovação" },
+  { value: "0 caos", label: "quando a política deixa de ser PDF solto" },
+  { value: "100%", label: "de rastreabilidade entre comprovante e decisão" },
 ];
 
 const PLANS = [
@@ -80,461 +80,387 @@ const PLANS = [
     name: "Starter",
     price: "R$ 29",
     period: "/mês",
-    desc: "Para equipes pequenas começarem com compliance.",
-    features: ["Até 5 usuários", "100 despesas/mês", "Política ativa", "Dashboard básico", "Suporte por e-mail"],
-    cta: "Começar grátis",
-    highlight: false,
+    desc: "Para times que querem sair da planilha sem aumentar operação.",
+    items: ["Até 5 usuários", "100 despesas por mês", "1 política ativa", "Painel operacional"],
   },
   {
     name: "Growth",
     price: "R$ 49",
     period: "/mês por usuário",
-    desc: "Para empresas que levam compliance a sério.",
-    features: ["Usuários ilimitados", "Despesas ilimitadas", "WhatsApp Zero-Login", "Validação NF-e SEFAZ", "Agente IA de Compliance", "Dashboard completo", "Relatórios de auditoria"],
-    cta: "Começar grátis",
-    highlight: true,
+    desc: "Para quem quer automação de verdade e fila de aprovação mais enxuta.",
+    items: ["Usuários ilimitados", "WhatsApp no fluxo", "Dashboard completo", "Histórico de auditoria"],
+    featured: true,
   },
   {
     name: "Enterprise",
     price: "Sob consulta",
     period: "",
-    desc: "Para grandes corporações com necessidades específicas.",
-    features: ["Tudo do Growth", "SSO / SAML", "SLA dedicado", "Multi-CNPJ", "Integrações ERP", "Onboarding guiado"],
-    cta: "Falar com vendas",
-    highlight: false,
+    desc: "Para operações maiores com estrutura, governança e integrações.",
+    items: ["SSO", "Multi-CNPJ", "SLA dedicado", "Onboarding assistido"],
   },
 ];
 
 const FAQS = [
-  { q: "Preciso instalar alguma coisa?", a: "Não. O Reembolsaaí é 100% web. Funcionários usam WhatsApp (que já têm no celular) ou acessam pelo navegador." },
-  { q: "Como funciona a validação de NF-e?", a: "O sistema extrai a chave de acesso da nota fiscal e consulta em tempo real a API da SEFAZ. Se a nota não existir ou estiver cancelada, a despesa é sinalizada automaticamente." },
-  { q: "O que acontece com políticas complexas?", a: "Nossa IA lê o PDF e gera as regras estruturadas. Você revisa, edita e ativa. Tudo versionado — você pode voltar a qualquer versão anterior." },
-  { q: "Tem contrato de fidelidade?", a: "Não. Planos mensais sem fidelidade. Cancele quando quiser." },
-  { q: "Como é feito o isolamento entre empresas?", a: "Usamos Row-Level Security no banco de dados. Os dados de cada empresa são isolados no nível do banco — não é só filtro de aplicação." },
+  {
+    q: "O colaborador precisa instalar app?",
+    a: "Não. Ele pode usar o WhatsApp que já tem no celular ou o portal web da empresa.",
+  },
+  {
+    q: "A IA aprova tudo sozinha?",
+    a: "Não. Ela reduz trabalho repetitivo e organiza contexto. A decisão humana continua nos casos fora da regra.",
+  },
+  {
+    q: "A política pode ser revisada antes de valer?",
+    a: "Sim. A IA estrutura as regras e o admin revisa antes de ativar a versão.",
+  },
+  {
+    q: "Isso serve para auditoria?",
+    a: "Sim. Cada despesa carrega comprovante, canal, leitura, regra aplicada e histórico de decisão.",
+  },
 ];
 
-// ─── COMPONENT ─────────────────────────────────────────────────────────────────
-
 export default function LandingPage() {
+  const { isAuthenticated, hasEmpresa } = useAuth();
+  const ctaHref = isAuthenticated ? (hasEmpresa ? "/dashboard" : "/comecar") : "/cadastro";
+  const ctaLabel = isAuthenticated ? "Abrir painel" : "Começar grátis";
+
   return (
-    <div className="min-h-screen bg-background text-foreground font-body overflow-x-hidden">
-      <Navbar />
-      <Hero />
-      <SocialProof />
-      <Problem />
-      <HowItWorks />
-      <Diferenciais />
-      <Pricing />
-      <FaqSection />
-      <FinalCta />
-      <Footer />
-    </div>
-  );
-}
-
-// ─── NAVBAR ────────────────────────────────────────────────────────────────────
-
-function Navbar() {
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading text-xs font-bold">R$</span>
-          </div>
-          <span className="font-heading text-foreground text-sm">Reembolsaaí</span>
-        </div>
-        <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-          <a href="#como-funciona" className="hover:text-foreground transition-colors">Como funciona</a>
-          <a href="#diferenciais" className="hover:text-foreground transition-colors">Diferenciais</a>
-          <a href="#precos" className="hover:text-foreground transition-colors">Preços</a>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden md:block">
-            Entrar
-          </Link>
-          <Link to="/cadastro" className="bg-primary text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-            Começar grátis
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-// ─── HERO ──────────────────────────────────────────────────────────────────────
-
-function Hero() {
-  return (
-    <section className="pt-32 pb-20 px-6">
-      <div className="max-w-4xl mx-auto text-center space-y-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span className="text-primary text-xs font-medium">IA que lê sua política e a aplica automaticamente</span>
-          </div>
-          <h1 className="font-heading text-4xl md:text-6xl text-foreground leading-tight">
-            Reembolsos corporativos<br />
-            <span className="text-primary">sem dor de cabeça</span>
-          </h1>
-          <p className="mt-6 text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Funcionário tira foto do comprovante no WhatsApp. A IA verifica, valida na SEFAZ e aplica a política em segundos. Gestor só aprova exceções.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-          <Link to="/cadastro" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-6 py-3 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
-            Começar grátis
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-          <a href="#como-funciona" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
-            Ver como funciona
-            <ChevronDown className="w-4 h-4" />
-          </a>
-        </motion.div>
-
-        {/* Mock verdict card */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="max-w-md mx-auto"
-        >
-          <div className="bg-card border border-border rounded-2xl p-5 text-left space-y-4 shadow-2xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Agente IA · Reembolsaaí</p>
-                <p className="text-sm font-medium text-foreground">Resultado da análise</p>
-              </div>
-              <div className="ml-auto flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-full">
-                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                <span className="text-primary text-xs font-semibold">Aprovada</span>
-              </div>
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-accent/30 via-background to-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <Receipt className="h-4 w-4" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Fornecedor", value: "Restaurante Central" },
-                { label: "Valor", value: "R$ 74,50", mono: true },
-                { label: "Categoria", value: "Alimentação" },
-                { label: "NF-e SEFAZ", value: "✓ Validada" },
-              ].map(({ label, value, mono }) => (
-                <div key={label} className="bg-secondary/50 rounded-lg px-3 py-2">
-                  <p className="text-[10px] text-muted-foreground">{label}</p>
-                  <p className={`text-sm text-foreground font-medium ${mono ? "font-mono" : ""}`}>{value}</p>
+            <div className="min-w-0">
+              <p className="truncate font-heading text-sm text-foreground sm:text-base">Reembolsaaí</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">expense control</p>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
+            <a href="#como-funciona" className="transition-colors hover:text-foreground">Como funciona</a>
+            <a href="#beneficios" className="transition-colors hover:text-foreground">Benefícios</a>
+            <a href="#precos" className="transition-colors hover:text-foreground">Preços</a>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            {!isAuthenticated ? (
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/login">Entrar</Link>
+              </Button>
+            ) : null}
+            <Button asChild size="sm" className="rounded-full px-4 sm:px-5">
+              <Link to={ctaHref}>{ctaLabel}</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <section className="px-4 pb-12 pt-12 sm:px-6 md:pb-16 md:pt-20">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div className="max-w-2xl">
+            <h1 className="font-heading text-4xl leading-[0.96] text-foreground sm:text-5xl md:text-7xl">
+              Reembolso corporativo que parece simples para quem envia e sério para quem aprova.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8 md:text-xl">
+              O colaborador envia o comprovante por WhatsApp ou web. O Reembolsaaí organiza, aplica a política, entrega contexto e deixa a equipe focada no que realmente exige decisão.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 w-full rounded-full px-6 sm:w-auto">
+                <Link to={ctaHref}>
+                  {ctaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 w-full rounded-full bg-card px-6 sm:w-auto">
+                <a href="#como-funciona">Ver demonstração do fluxo</a>
+              </Button>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-2.5 text-sm text-muted-foreground">
+              {["WhatsApp + Web", "Política + IA", "Auditoria pronta"].map((item) => (
+                <div key={item} className="rounded-full border border-border bg-card px-3 py-2 shadow-sm sm:px-4">
+                  {item}
                 </div>
               ))}
             </div>
-            <div className="bg-primary/8 border border-primary/20 rounded-lg px-3 py-2.5">
-              <p className="text-xs text-primary">
-                ✓ Dentro do limite de R$ 80/refeição · Nota validada · Aprovada automaticamente
-              </p>
-            </div>
           </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
 
-// ─── SOCIAL PROOF ──────────────────────────────────────────────────────────────
+          <div className="relative">
+            <div className="absolute -left-6 top-10 hidden h-24 w-24 rounded-full bg-primary/15 blur-3xl md:block" />
+            <div className="absolute -right-8 bottom-6 hidden h-24 w-24 rounded-full bg-accent blur-3xl md:block" />
 
-function SocialProof() {
-  return (
-    <section className="py-12 border-y border-border bg-card/40">
-      <div className="max-w-5xl mx-auto px-6">
-        <p className="text-center text-xs text-muted-foreground uppercase tracking-widest mb-8">
-          Por que o mercado precisa disso agora
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { value: "99%", label: "das empresas BR gerenciam reembolsos em planilha" },
-            { value: "0",   label: "soluções com WhatsApp zero-login no mercado" },
-            { value: "3×",  label: "mais rápido que fluxos de aprovação manuais" },
-            { value: "R$0", label: "fraude com validação NF-e em tempo real" },
-          ].map(({ value, label }) => (
-            <div key={label} className="text-center space-y-1">
-              <p className="font-heading text-3xl md:text-4xl text-primary">{value}</p>
-              <p className="text-muted-foreground text-xs leading-relaxed">{label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── PROBLEM ───────────────────────────────────────────────────────────────────
-
-function Problem() {
-  return (
-    <section className="py-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-primary text-sm font-medium mb-3">O problema</p>
-          <h2 className="font-heading text-3xl md:text-4xl text-foreground">
-            Gestão de reembolsos hoje é um pesadelo
-          </h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            { icon: AlertTriangle, title: "Fraudes passam despercebidas", desc: "Notas duplicadas, comprovantes falsos e despesas acima do limite são aprovados manualmente por gestores sobrecarregados." },
-            { icon: Clock, title: "Processo lento e burocrático", desc: "Semanas entre o lançamento e o reembolso. Funcionário insatisfeito. Financeiro sem visibilidade em tempo real." },
-            { icon: FileText, title: "Política que ninguém lê", desc: "PDF de 40 páginas no Google Drive. Ninguém sabe os limites. Cada gestor aprova de um jeito." },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="bg-card border border-border rounded-xl p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                <Icon className="w-5 h-5 text-destructive" />
-              </div>
-              <h3 className="font-medium text-foreground">{title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── HOW IT WORKS ──────────────────────────────────────────────────────────────
-
-function HowItWorks() {
-  return (
-    <section id="como-funciona" className="py-20 px-6 bg-card/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-primary text-sm font-medium mb-3">Como funciona</p>
-          <h2 className="font-heading text-3xl md:text-4xl text-foreground">
-            De comprovante a reembolso em segundos
-          </h2>
-        </div>
-        <div className="space-y-4">
-          {STEPS.map(({ n, title, desc }, i) => (
-            <motion.div
-              key={n}
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="flex gap-5 bg-card border border-border rounded-xl p-6"
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="font-mono text-primary text-sm font-bold">{n}</span>
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground mb-1">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── DIFERENCIAIS ──────────────────────────────────────────────────────────────
-
-function Diferenciais() {
-  return (
-    <section id="diferenciais" className="py-20 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-primary text-sm font-medium mb-3">Diferenciais</p>
-          <h2 className="font-heading text-3xl md:text-4xl text-foreground">
-            O que nenhuma outra solução tem
-          </h2>
-          <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-            Três funcionalidades inéditas no Brasil. Cinco diferenciais que colocam o Reembolsaaí em outra categoria.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {DIFERENCIAIS.map(({ icon: Icon, badge, highlight, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.07 }}
-              className={`rounded-xl p-6 space-y-4 border transition-all hover:-translate-y-0.5 ${
-                highlight
-                  ? "bg-primary/5 border-primary/30 hover:border-primary/50"
-                  : "bg-card border-border hover:border-border/80"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  highlight ? "bg-primary/15" : "bg-secondary"
-                }`}>
-                  <Icon className={`w-5 h-5 ${highlight ? "text-primary" : "text-muted-foreground"}`} />
+            <div className="relative rounded-[2rem] border border-border bg-card p-4 shadow-sm backdrop-blur sm:p-5">
+              <div className="rounded-[1.6rem] border border-border bg-background/80 p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Despesa recebida</p>
+                    <p className="mt-2 text-lg font-semibold text-foreground">Almoço com cliente</p>
+                  </div>
+                  <div className="w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    Dentro da política
+                  </div>
                 </div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                  highlight
-                    ? "text-primary border-primary/30 bg-primary/10"
-                    : "text-muted-foreground border-border bg-secondary"
-                }`}>
-                  {badge}
-                </span>
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground mb-1.5">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-// ─── PRICING ───────────────────────────────────────────────────────────────────
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {[
+                    ["Canal", "WhatsApp"],
+                    ["Valor", "R$ 87,40"],
+                    ["Categoria", "Alimentação"],
+                    ["Resultado", "Aprovação automática"],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-border bg-card px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+                      <p className="mt-1 text-sm font-medium text-foreground">{value}</p>
+                    </div>
+                  ))}
+                </div>
 
-function Pricing() {
-  return (
-    <section id="precos" className="py-20 px-6 bg-card/30">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-primary text-sm font-medium mb-3">Preços</p>
-          <h2 className="font-heading text-3xl md:text-4xl text-foreground">
-            Simples, sem surpresas
-          </h2>
-          <p className="text-muted-foreground mt-3">14 dias grátis. Sem cartão de crédito.</p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {PLANS.map(({ name, price, period, desc, features, cta, highlight }) => (
-            <div
-              key={name}
-              className={`rounded-2xl p-7 space-y-6 border relative ${
-                highlight
-                  ? "bg-primary/5 border-primary/30"
-                  : "bg-card border-border"
-              }`}
-            >
-              {highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                    Mais popular
-                  </span>
+                <div className="mt-5 rounded-2xl border border-border bg-accent/50 px-4 py-4">
+                  <p className="text-sm font-medium text-foreground">A IA já fez a parte repetitiva.</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    Extração, leitura inicial, política aplicada e histórico prontos antes de qualquer aprovador tocar na fila.
+                  </p>
                 </div>
-              )}
-              <div>
-                <p className="text-muted-foreground text-sm mb-2">{name}</p>
-                <div className="flex items-end gap-1">
-                  <span className="font-heading text-3xl text-foreground">{price}</span>
-                  {period && <span className="text-muted-foreground text-sm mb-1">{period}</span>}
-                </div>
-                <p className="text-muted-foreground text-xs mt-2">{desc}</p>
               </div>
-              <ul className="space-y-2.5">
-                {features.map(f => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <span className="text-foreground">{f}</span>
-                  </li>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Fila humana", value: "Só exceções" },
+                  { label: "Governança", value: "Tenant isolado" },
+                  { label: "Financeiro", value: "Saída rastreável" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-border bg-card px-4 py-4">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
+                    <p className="mt-2 text-sm font-medium text-foreground">{item.value}</p>
+                  </div>
                 ))}
-              </ul>
-              <Link to="/cadastro" className={`block text-center py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-105 ${
-                highlight
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "border border-border text-foreground hover:bg-secondary"
-              }`}>
-                {cta}
-              </Link>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── FAQ ───────────────────────────────────────────────────────────────────────
-
-function FaqSection() {
-  const [open, setOpen] = useState(null);
-  return (
-    <section className="py-20 px-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-primary text-sm font-medium mb-3">FAQ</p>
-          <h2 className="font-heading text-3xl text-foreground">Perguntas frequentes</h2>
-        </div>
-        <div className="space-y-3">
-          {FAQS.map(({ q, a }, i) => (
-            <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
-              >
-                <span className="text-foreground text-sm font-medium">{q}</span>
-                <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${open === i ? "rotate-180" : ""}`} />
-              </button>
-              {open === i && (
-                <div className="px-5 pb-4">
-                  <p className="text-muted-foreground text-sm leading-relaxed">{a}</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── FINAL CTA ─────────────────────────────────────────────────────────────────
-
-function FinalCta() {
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-          <Sparkles className="w-8 h-8 text-primary" />
-        </div>
-        <h2 className="font-heading text-3xl md:text-5xl text-foreground leading-tight">
-          Pronto para <span className="text-primary">compliance automático</span>?
-        </h2>
-        <p className="text-muted-foreground text-lg">
-          14 dias grátis. Sem cartão. Sem burocracia.
-        </p>
-        <Link to="/cadastro" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-medium px-8 py-4 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 text-base">
-          Começar grátis agora
-          <ArrowRight className="w-5 h-5" />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-// ─── FOOTER ────────────────────────────────────────────────────────────────────
-
-function Footer() {
-  return (
-    <footer className="border-t border-border py-10 px-6">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading text-[10px] font-bold">R$</span>
           </div>
-          <span className="font-heading text-foreground text-sm">Reembolsaaí</span>
         </div>
-        <p className="text-muted-foreground text-xs">
-          © 2026 Reembolsaaí. Todos os direitos reservados.
-        </p>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition-colors">Privacidade</a>
-          <a href="#" className="hover:text-foreground transition-colors">Termos</a>
-          <a href="#" className="hover:text-foreground transition-colors">Contato</a>
+      </section>
+
+      <section className="px-4 pb-6 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 md:grid-cols-4">
+          {METRICS.map((item) => (
+            <div key={item.label} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
+              <p className="font-heading text-4xl text-foreground">{item.value}</p>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.label}</p>
+            </div>
+          ))}
         </div>
-      </div>
-    </footer>
+      </section>
+
+      <section className="px-6 py-14">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">O problema hoje</p>
+            <h2 className="mt-3 font-heading text-4xl leading-tight text-foreground md:text-5xl">
+              Reembolso não trava por falta de tela. Trava por falta de fluxo.
+            </h2>
+            <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
+              A maior dor não é capturar o comprovante. É fazer política, aprovação, auditoria e financeiro conversarem sem espalhar trabalho manual pela empresa.
+            </p>
+          </div>
+
+          <div className="grid gap-4">
+            {PAINS.map((item) => (
+              <div key={item} className="flex gap-4 rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+                  <CircleAlert className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-base leading-7 text-foreground">{item}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="beneficios" className="border-y border-border bg-card/30 px-6 py-14">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Benefícios</p>
+            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
+              Um produto para vender simplicidade sem perder controle.
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-2">
+            {BENEFITS.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="rounded-[2rem] border border-border bg-card p-7 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 font-heading text-2xl text-foreground">{title}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="como-funciona" className="px-6 py-14">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Como funciona</p>
+            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
+              Uma jornada simples para gerar confiança e venda.
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-4">
+            {STEPS.map((step) => (
+              <div key={step.number} className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {step.number}
+                </div>
+                <h3 className="mt-5 font-heading text-2xl text-foreground">{step.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-14">
+        <div className="mx-auto grid max-w-6xl gap-8 rounded-[2.25rem] border border-border bg-card p-8 shadow-sm md:grid-cols-[0.95fr_1.05fr] md:p-10">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Por que converte</p>
+            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
+              A promessa é clara: menos atrito para o colaborador, mais critério para a empresa.
+            </h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              { icon: Users, title: "Colaborador", text: "Envia rápido e entende o status." },
+              { icon: ShieldCheck, title: "Aprovador", text: "Recebe contexto antes de decidir." },
+              { icon: WalletCards, title: "Financeiro", text: "Enxerga saída e trilha no mesmo fluxo." },
+              { icon: BarChart3, title: "Admin", text: "Liga empresa, política e equipe sem improviso." },
+            ].map(({ icon: Icon, title, text }) => (
+              <div key={title} className="rounded-[1.75rem] border border-border bg-background p-5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 font-heading text-xl text-foreground">{title}</h3>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="precos" className="border-y border-border bg-card/30 px-6 py-14">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Preços</p>
+            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
+              Planos claros para vender sem fricção.
+            </h2>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-[2rem] border p-7 shadow-sm ${
+                  plan.featured
+                    ? "border-primary bg-accent/40 ring-1 ring-primary/20"
+                    : "border-border bg-card"
+                }`}
+              >
+                <p className="font-heading text-2xl text-foreground">{plan.name}</p>
+                <p className="mt-4 text-4xl font-semibold text-foreground">
+                  {plan.price}
+                  <span className="ml-1 text-base font-normal text-muted-foreground">{plan.period}</span>
+                </p>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{plan.desc}</p>
+                <ul className="mt-6 space-y-3 text-sm text-foreground">
+                  {plan.items.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  asChild
+                  className={`mt-8 w-full rounded-full ${
+                    plan.featured
+                      ? ""
+                      : "bg-foreground text-background hover:bg-foreground/90"
+                  }`}
+                >
+                  <Link to="/cadastro">Começar</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-14">
+        <div className="mx-auto max-w-5xl">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">FAQ</p>
+            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
+              Perguntas que aparecem antes da venda.
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-4">
+            {FAQS.map((faq) => (
+              <div key={faq.q} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
+                <h3 className="font-heading text-2xl text-foreground">{faq.q}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-16 pt-4">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-border bg-card p-8 text-center shadow-sm md:p-10">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Pronto para testar</p>
+          <h2 className="mt-4 font-heading text-4xl text-foreground md:text-5xl">
+            Coloque sua política para trabalhar e reduza a fila de reembolso da empresa.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+            Comece com onboarding simples, receba despesas no canal certo e deixe as exceções chegarem com contexto.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 rounded-full px-6">
+              <Link to={ctaHref}>
+                {ctaLabel}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            {!isAuthenticated ? (
+              <Button asChild size="lg" variant="outline" className="h-12 rounded-full bg-background px-6">
+                <Link to="/login">Entrar</Link>
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-border bg-background/80">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row">
+          <div className="flex items-center gap-2">
+            <Receipt className="h-4 w-4" />
+            <span>© {new Date().getFullYear()} Reembolsaaí</span>
+          </div>
+          <div className="flex gap-6">
+            <Link to="/login" className="transition-colors hover:text-foreground">Entrar</Link>
+            <Link to="/cadastro" className="transition-colors hover:text-foreground">Criar conta</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
