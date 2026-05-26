@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CATEGORIAS, createDespesa, listPoliticas, extrairRecibo, uploadComprovante } from "@/api/despesas";
 import { analisarDespesa } from "@/api/politica";
+import { validarChaveFiscal } from "@/lib/nf-chave";
 import { useAuth } from "@/lib/AuthContext";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -46,8 +47,12 @@ export function useNewExpense() {
   const valorNum = Number(form.valor_brl) || 0;
   const acima = limite != null && valorNum > Number(limite);
   const bloqueado = conformidade?.status === "revisar";
-  const motivosIA = conformidade?.motivos || [];
-  const precisaRevisar = acima || bloqueado;
+  // Selo fiscal (offline) entra no veredito do preview — espelha o createDespesa,
+  // pra não mostrar "aprovação automática" e a despesa cair em pendente.
+  const seloFiscal = validarChaveFiscal(ocr?.chave_acesso, ocr?.cnpj);
+  const nfSuspeita = seloFiscal.selo === "suspeita";
+  const motivosIA = [...(conformidade?.motivos || []), ...(nfSuspeita ? ["Comprovante com chave fiscal suspeita/inválida"] : [])];
+  const precisaRevisar = acima || bloqueado || nfSuspeita;
 
   const handleReceipt = async (file) => {
     if (!file) return;

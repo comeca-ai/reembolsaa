@@ -32,7 +32,9 @@ function parse(text: string) {
     const data = typeof o.data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.data) ? o.data : null;
     const itens = Array.isArray(o.itens) ? o.itens.slice(0, 40).map((it: any) => ({ nome: typeof it?.nome === "string" ? it.nome.slice(0, 120) : String(it?.nome || "").slice(0, 120), valor: numOrNull(it?.valor) })).filter((it: any) => it.nome) : [];
     const cnpj = (typeof o.cnpj === "string" ? o.cnpj : "").replace(/\D/g, "").slice(0, 14) || null;
-    const chave_acesso = (typeof o.chave_acesso === "string" ? o.chave_acesso : "").replace(/\D/g, "").slice(0, 44) || null;
+    // Não força corte em 44: deixa o validador (nf-chave.js) tratar tamanho ≠ 44 como suspeita,
+    // igual ao whatsapp-ingest. Cap defensivo em 60 só pra evitar string gigante.
+    const chave_acesso = (typeof o.chave_acesso === "string" ? o.chave_acesso : "").replace(/\D/g, "").slice(0, 60) || null;
     return { colaborador: typeof o.colaborador === "string" ? o.colaborador.slice(0, 120) : null, fornecedor: typeof o.fornecedor === "string" ? o.fornecedor.slice(0, 120) : null, cnpj, chave_acesso, valor_brl: numOrNull(o.valor_brl), data, categoria, descricao: typeof o.descricao === "string" ? o.descricao.slice(0, 200) : null, itens };
   } catch (_) { return null; }
 }
