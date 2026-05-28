@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, CheckCircle2, PlusCircle, Upload, ImagePlus, X, Wand2, AlertTriangle, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2, PlusCircle, Upload, ImagePlus, X, Wand2, AlertTriangle, Clock, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,46 +27,115 @@ export default function NewExpensePage() {
       ...(result._acima ? [`Acima da política (excesso de ${brl(result.policy_excesso_brl)})`] : []),
       ...((result._motivos || [])),
     ];
+    
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md bg-card border border-border rounded-2xl p-8 text-center space-y-4">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto ${aprovada ? "bg-primary/10" : "bg-warning/10"}`}>
-            {aprovada ? <CheckCircle2 className="w-7 h-7 text-primary" /> : <Clock className="w-7 h-7 text-warning" />}
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }} 
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md"
+        >
+          {/* Card de sucesso */}
+          <div className={`rounded-2xl p-8 text-center space-y-5 ${
+            aprovada 
+              ? "bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20" 
+              : "bg-gradient-to-br from-warning/10 via-warning/5 to-background border border-warning/20"
+          }`}>
+            {/* Ícone animado */}
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+              className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto ${
+                aprovada ? "bg-primary/20" : "bg-warning/20"
+              }`}
+            >
+              {aprovada ? (
+                <CheckCircle2 className="w-10 h-10 text-primary" />
+              ) : (
+                <Clock className="w-10 h-10 text-warning" />
+              )}
+            </motion.div>
+            
+            {/* Título */}
+            <div>
+              <h1 className="font-heading text-2xl text-foreground mb-2">
+                {aprovada ? "✨ Despesa aprovada!" : "⏳ Enviada para análise"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {aprovada
+                  ? "Está dentro da política e foi aprovada automaticamente."
+                  : "Precisa de revisão humana antes do reembolso."}
+              </p>
+            </div>
+
+            {/* Resumo */}
+            <div className="bg-card/80 rounded-xl p-4 text-left space-y-2 border border-border">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Valor</span>
+                <span className="font-mono font-semibold text-foreground">{brl(result.valor_brl)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Categoria</span>
+                <span className="text-foreground">{result.categoria}</span>
+              </div>
+              <div className="flex justify-between text-sm items-center">
+                <span className="text-muted-foreground">Status</span>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
+                  aprovada 
+                    ? "bg-primary/10 text-primary" 
+                    : "bg-warning/10 text-warning"
+                }`}>
+                  {aprovada ? "Aprovada" : "Em análise"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm items-center pt-2 border-t border-border">
+                <span className="text-muted-foreground">Comprovante</span>
+                <NfSeloBadge selo={result.nf_selo} />
+              </div>
+            </div>
+
+            {/* Motivos se houver */}
+            {!aprovada && motivosResult.length > 0 && (
+              <div className="text-left">
+                <p className="text-sm text-foreground font-medium mb-2">Motivos:</p>
+                <ul className="space-y-1.5">
+                  {motivosResult.map((m, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                      <span>{m}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* CTAs */}
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1 h-12 rounded-xl" onClick={reset}>
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Nova despesa
+              </Button>
+              <Button 
+                className="flex-1 h-12 rounded-xl shadow-sm" 
+                onClick={() => navigate(aprovada ? "/dashboard" : "/aprovacoes")}
+              >
+                {aprovada ? (
+                  <><TrendingUp className="w-4 h-4 mr-2" /> Ver dashboard</>
+                ) : (
+                  <><Clock className="w-4 h-4 mr-2" /> Ver aprovações</>
+                )}
+              </Button>
+            </div>
           </div>
-          <div>
-            <h1 className="font-heading text-2xl text-foreground mb-1">
-              {aprovada ? "Aprovada automaticamente" : "Enviada para análise"}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {aprovada
-                ? "A despesa está dentro da política e foi aprovada na hora."
-                : "A despesa precisa de análise antes do reembolso."}
+
+          {/* Dica */}
+          {aprovada && (
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              💡 <span className="text-foreground">Dica:</span> Despesas dentro da política são aprovadas em até 2 minutos
             </p>
-          </div>
-          {!aprovada && motivosResult.length > 0 && (
-            <ul className="text-left text-sm bg-warning/5 border border-warning/20 rounded-xl p-3 space-y-1">
-              {motivosResult.map((m, i) => (
-                <li key={i} className="flex items-start gap-2 text-foreground">
-                  <AlertTriangle className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" /> <span>{m}</span>
-                </li>
-              ))}
-            </ul>
           )}
-          <div className="bg-secondary/40 rounded-xl p-4 text-left text-sm space-y-1">
-            <div className="flex justify-between"><span className="text-muted-foreground">Valor</span><span className="font-mono text-foreground">{brl(result.valor_brl)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Categoria</span><span className="text-foreground">{result.categoria}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="text-foreground">{aprovada ? "Aprovada" : "Pendente"}</span></div>
-            <div className="flex justify-between items-center"><span className="text-muted-foreground">Comprovante fiscal</span><NfSeloBadge selo={result.nf_selo} /></div>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={reset}>
-              Nova despesa
-            </Button>
-            <Button className="flex-1" onClick={() => navigate(aprovada ? "/dashboard" : "/aprovacoes")}>
-              {aprovada ? "Ir ao dashboard" : "Ver aprovações"}
-            </Button>
-          </div>
         </motion.div>
       </div>
     );
@@ -74,64 +143,89 @@ export default function NewExpensePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 md:px-8 py-8 md:py-12">
-        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="w-4 h-4" /> Voltar
-        </Link>
-
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <div className="max-w-2xl mx-auto px-4 md:px-8 py-6 md:py-10">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -8 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          className="mb-6"
+        >
+          <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </Link>
+          
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <PlusCircle className="w-5 h-5 text-primary" />
+              <Wallet className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="font-heading text-foreground text-2xl md:text-3xl">Nova despesa</h1>
-              <p className="text-muted-foreground text-sm mt-0.5">Suba a foto do comprovante — a IA preenche os campos.</p>
+              <h1 className="font-heading text-foreground text-xl md:text-2xl">Nova despesa</h1>
+              <p className="text-muted-foreground text-sm">Envie o comprovante e a IA preenche o resto</p>
             </div>
           </div>
         </motion.div>
 
-        {/* Receipt dropzone */}
-        <div className="mb-6">
+        {/* Upload de comprovante */}
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
           <input id="receipt-file" type="file" accept="image/*,.pdf" className="hidden"
             onChange={(e) => e.target.files?.[0] && handleReceipt(e.target.files[0])} />
+          
           {!receipt ? (
             <div
               onClick={() => document.getElementById("receipt-file").click()}
-              className="border-2 border-dashed border-border rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-secondary/30 transition-all"
+              className="border-2 border-dashed border-border rounded-2xl p-8 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group"
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <ImagePlus className="w-6 h-6 text-primary" />
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ImagePlus className="w-8 h-8 text-primary" />
               </div>
               <div className="text-center">
-                <p className="text-foreground text-sm font-medium">Subir foto do comprovante</p>
-                <p className="text-muted-foreground text-xs mt-0.5">JPG, PNG ou PDF · a IA lê e preenche</p>
+                <p className="text-foreground font-medium">Clique para subir o comprovante</p>
+                <p className="text-muted-foreground text-xs mt-1">JPG, PNG ou PDF · A IA extrai os dados automaticamente</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Preenchimento automático com IA</span>
               </div>
             </div>
           ) : (
-            <div className="border border-border rounded-2xl p-4 flex items-center gap-4">
+            <div className="border border-border rounded-2xl p-4 flex items-center gap-4 bg-card">
               {preview ? (
-                <img src={preview} alt="comprovante" className="w-16 h-16 rounded-lg object-cover border border-border" />
+                <img src={preview} alt="comprovante" className="w-16 h-16 rounded-xl object-cover border border-border" />
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center"><Upload className="w-6 h-6 text-muted-foreground" /></div>
+                <div className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-muted-foreground" />
+                </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-foreground text-sm font-medium truncate">{receipt.name}</p>
+                <p className="text-foreground font-medium truncate">{receipt.name}</p>
                 {ocrLoading ? (
                   <p className="text-primary text-xs flex items-center gap-1.5 mt-1">
                     <Wand2 className="w-3.5 h-3.5 animate-pulse" />
-                    {ocrStage === "analisando" ? "Agente analisando contra a política…" : "Lendo comprovante (OCR)…"}
+                    {ocrStage === "analisando" ? "IA analisando contra a política…" : "Lendo comprovante…"}
                   </p>
                 ) : (
-                  <p className="text-muted-foreground text-xs mt-1">Campos preenchidos — confira abaixo.</p>
+                  <p className="text-muted-foreground text-xs mt-1">✓ Campos preenchidos — confira abaixo</p>
                 )}
               </div>
-              <button onClick={clearReceipt} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+              <button onClick={clearReceipt} className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
-        </div>
+        </motion.div>
 
-        <form onSubmit={submit} className="bg-card border border-border rounded-2xl p-6 md:p-8 space-y-5">
+        {/* Formulário */}
+        <motion.form 
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          onSubmit={submit} 
+          className="bg-card border border-border rounded-2xl p-6 space-y-5"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="colaborador">Colaborador</Label>
@@ -147,12 +241,19 @@ export default function NewExpensePage() {
             <div className="space-y-1.5">
               <Label>Categoria</Label>
               <Select value={form.categoria} onValueChange={(v) => set("categoria", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
                 <SelectContent>
                   {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
-              {limite != null && <p className="text-[11px] text-muted-foreground">Limite da política: {brl(limite)}</p>}
+              {limite != null && (
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-primary" />
+                  Limite da política: {brl(limite)}
+                </p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="valor">Valor (R$)</Label>
@@ -166,32 +267,48 @@ export default function NewExpensePage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="obs">Observação</Label>
-            <textarea id="obs" value={form.observacao} onChange={(e) => set("observacao", e.target.value)} rows={2}
-              placeholder="Detalhes do gasto..." className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/40" />
+            <Label htmlFor="obs">Observação (opcional)</Label>
+            <textarea 
+              id="obs" 
+              value={form.observacao} 
+              onChange={(e) => set("observacao", e.target.value)} 
+              rows={2}
+              placeholder="Detalhes do gasto..." 
+              className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none" 
+            />
           </div>
 
-          {/* Veredito ao vivo (numérico + restrições da política via IA) */}
+          {/* Veredito ao vivo */}
           {(valorNum > 0 || ocr) && (
             precisaRevisar ? (
-              <div className="flex items-start gap-2.5 text-sm bg-warning/5 border border-warning/20 rounded-lg p-3">
-                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 text-sm bg-warning/5 border border-warning/20 rounded-xl p-4">
+                <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                 <div>
                   <p className="text-warning font-medium">Fora da política — irá para análise</p>
-                  <ul className="text-muted-foreground text-xs mt-1 space-y-0.5 list-disc list-inside">
+                  <ul className="text-muted-foreground text-xs mt-1.5 space-y-0.5 list-disc list-inside">
                     {acima && <li>Excesso de {brl(valorNum - Number(limite))} sobre o limite de {brl(limite)}.</li>}
                     {motivosIA.map((m, i) => <li key={i}>{m}</li>)}
                   </ul>
-                  {conformidade?.raciocinio && <p className="text-muted-foreground text-[11px] mt-1.5 italic">🧠 {conformidade.raciocinio}</p>}
+                  {conformidade?.raciocinio && (
+                    <p className="text-muted-foreground text-[11px] mt-2 italic border-t border-warning/10 pt-2">
+                      🤖 "{conformidade.raciocinio}"
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (ocr || (valorNum > 0 && limite != null)) ? (
-              <div className="flex items-start gap-2.5 text-sm bg-primary/5 border border-primary/20 rounded-lg p-3">
-                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 text-sm bg-primary/5 border border-primary/20 rounded-xl p-4">
+                <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-primary font-medium">Dentro da política — aprovação automática</p>
-                  <p className="text-muted-foreground text-xs mt-0.5">{limite != null ? `Dentro do limite de ${brl(limite)} para ${form.categoria}.` : "Sem violações identificadas."}</p>
-                  {conformidade?.raciocinio && <p className="text-muted-foreground text-[11px] mt-1.5 italic">🧠 {conformidade.raciocinio}</p>}
+                  <p className="text-muted-foreground text-xs mt-1">
+                    {limite != null ? `Dentro do limite de ${brl(limite)} para ${form.categoria}.` : "Sem violações identificadas."}
+                  </p>
+                  {conformidade?.raciocinio && (
+                    <p className="text-muted-foreground text-[11px] mt-2 italic border-t border-primary/10 pt-2">
+                      🤖 "{conformidade.raciocinio}"
+                    </p>
+                  )}
                 </div>
               </div>
             ) : null
@@ -199,22 +316,44 @@ export default function NewExpensePage() {
 
           {/* Itens lidos do comprovante */}
           {ocr?.itens?.length > 0 && (
-            <div className="border border-border rounded-lg p-3">
-              <p className="text-[11px] text-muted-foreground mb-1.5">Itens identificados no comprovante</p>
-              <ul className="text-sm text-foreground space-y-0.5">
+            <div className="border border-border rounded-xl p-4 bg-secondary/30">
+              <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                Itens identificados no comprovante
+              </p>
+              <ul className="text-sm space-y-1">
                 {ocr.itens.map((it, i) => (
-                  <li key={i} className="flex justify-between"><span>{it.nome}</span>{it.valor != null && <span className="font-mono text-muted-foreground">{brl(it.valor)}</span>}</li>
+                  <li key={i} className="flex justify-between py-1 border-b border-border/50 last:border-0">
+                    <span className="text-foreground">{it.nome}</span>
+                    {it.valor != null && <span className="font-mono text-muted-foreground">{brl(it.valor)}</span>}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
-          <Button type="submit" disabled={isSaving || ocrLoading} className="w-full h-11 text-base">
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Lançar despesa</>}
+          <Button 
+            type="submit" 
+            disabled={isSaving || ocrLoading} 
+            className="w-full h-12 text-base rounded-xl shadow-sm"
+            size="lg"
+          >
+            {isSaving ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <CheckCircle2 className="w-5 h-5 mr-2" />
+                Lançar despesa
+              </>
+            )}
           </Button>
-        </form>
+        </motion.form>
       </div>
     </div>
   );
