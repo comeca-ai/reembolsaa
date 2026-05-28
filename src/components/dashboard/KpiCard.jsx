@@ -2,6 +2,9 @@ import React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { motion } from "framer-motion";
 
+/**
+ * @param {{ label: string; value: number; unit?: string; delta?: number; index?: number; format?: 'number'|'currency'|'percent'; icon?: React.ComponentType; iconColor?: string }} props
+ */
 export default function KpiCard({ label, value, unit, delta, index, format = "number", icon: Icon, iconColor }) {
   const positive = delta >= 0;
   // Some KPIs are "good" when negative (e.g. violations, processing time)
@@ -25,7 +28,7 @@ export default function KpiCard({ label, value, unit, delta, index, format = "nu
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted-foreground font-medium">{label}</span>
         {Icon && (
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconColor ?? "bg-secondary"}`}>
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconColor ? iconColor : "bg-secondary"}`}>
             <Icon className="w-3.5 h-3.5 text-muted-foreground" />
           </div>
         )}

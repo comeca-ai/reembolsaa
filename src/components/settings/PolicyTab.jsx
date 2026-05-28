@@ -49,7 +49,9 @@ export default function PolicyTab() {
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
-    if (fileRef.current) fileRef.current.value = "";
+    /** @type {HTMLInputElement|null} */
+    const input = fileRef.current;
+    if (input && input.value) input.value = "";
     if (!file) return;
     setError("");
     setExtracting(true);
@@ -106,7 +108,11 @@ export default function PolicyTab() {
         </div>
         <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={handleFile} />
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => {
+            /** @type {HTMLInputElement|null} */
+            const input = fileRef.current;
+            if (input) input.click();
+          }}
           disabled={extracting}
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
@@ -124,7 +130,11 @@ export default function PolicyTab() {
           <Inbox className="w-10 h-10 mx-auto mb-4 text-muted-foreground/50" />
           <h3 className="font-heading text-foreground text-lg mb-1">Nenhuma regra ainda</h3>
           <p className="text-muted-foreground text-sm mb-5">Suba o PDF da política — a IA extrai os limites por categoria automaticamente.</p>
-          <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 text-primary text-sm font-medium hover:underline">
+          <button onClick={() => {
+            /** @type {HTMLInputElement|null} */
+            const input = fileRef.current;
+            if (input) input.click();
+          }} className="inline-flex items-center gap-2 text-primary text-sm font-medium hover:underline">
             <Wand2 className="w-4 h-4" /> Ler política com IA
           </button>
         </div>

@@ -27,6 +27,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const [form, setForm] = useState({ nome: "", email: "", password: "", telefone: "" });
+  /** @type {[Record<string, string>, React.Dispatch<React.SetStateAction<Record<string, string>>>]} */
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

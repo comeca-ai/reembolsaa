@@ -3,6 +3,9 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 import { CHART_COLORS } from "@/lib/mocks/dashboardMockData";
 
+/**
+ * @param {{ active?: boolean; payload?: Array<{ payload: { name: string; value: number; count: number } }> }} props
+ */
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;

@@ -5,6 +5,9 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 
+/**
+ * @param {{ active?: boolean; payload?: Array<{ value: number }>; label?: string }} props
+ */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   const score = payload[0].value;

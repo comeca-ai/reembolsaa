@@ -129,7 +129,11 @@ export default function ImportUsersModal({ open, onClose, onImport }) {
               <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                onClick={() => inputRef.current?.click()}
+                onClick={() => {
+                  /** @type {HTMLInputElement|null} */
+                  const input = inputRef.current;
+                  if (input) input.click();
+                }}
                 className="border-2 border-dashed border-border hover:border-primary/40 rounded-xl p-10 text-center cursor-pointer transition-colors group"
               >
                 <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary mx-auto mb-3 transition-colors" />

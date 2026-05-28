@@ -14,7 +14,7 @@ export async function listProfiles() {
     supabase.rpc("equipe_da_empresa"),
     supabase
       .from("invitations")
-      .select("id, email, role, created_at, accepted_at")
+      .select("id, email, role, telefone, created_at, accepted_at")
       .is("accepted_at", null)
       .order("created_at", { ascending: true }),
   ]);

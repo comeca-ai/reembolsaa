@@ -41,6 +41,7 @@ export default function ApprovalPage() {
   });
 
   const mutation = useMutation({
+    /** @type {(args: { id: string; decisao: string; comentario?: string }) => Promise<any>} */
     mutationFn: ({ id, decisao, comentario }) =>
       decidirDespesa({
         empresaId: empresa?.id,

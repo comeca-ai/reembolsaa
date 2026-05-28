@@ -156,6 +156,7 @@ function UserActions({ user, onEdit, onRemove, onResendInvite }) {
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
+      {/* @ts-ignore - align is a valid Radix UI prop */}
       <DropdownMenuContent align="end" className="bg-card border-border w-44">
         <DropdownMenuItem
           className="gap-2 text-sm cursor-pointer"

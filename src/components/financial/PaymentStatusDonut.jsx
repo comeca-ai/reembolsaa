@@ -9,6 +9,9 @@ const COLORS = [
   "hsl(var(--destructive))",
 ];
 
+/**
+ * @param {{ active?: boolean; payload?: Array<{ name: string; value: number; payload: { pct: string } }> }} props
+ */
 const CustomTooltip = ({ active, payload }) => {
   if (!active || !payload?.length) return null;
   const d = payload[0];
