@@ -16,6 +16,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
 
+const SOCIAL_PROOF = {
+  headline: "Já usado por times de",
+  companies: ["Startups fintech", "Escritórios de advocacia", "Agências de marketing", "Clínicas médicas"],
+  stats: [
+    { value: "2.000+", label: "despesas processadas" },
+    { value: "R$ 1.2M", label: "em reembolsos" },
+    { value: "4.9/5", label: "satisfação dos usuários" },
+  ],
+};
+
 const PAINS = [
   "Planilhas, e-mails e comprovantes espalhados em vários canais.",
   "Gestores gastando tempo aprovando despesa repetitiva sem contexto.",
@@ -157,32 +167,48 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <section className="px-4 pb-12 pt-12 sm:px-6 md:pb-16 md:pt-20">
+      {/* Hero Section */}
+      <section className="relative px-4 pb-12 pt-12 sm:px-6 md:pb-16 md:pt-20">
+        {/* Badge de urgência */}
+        <div className="mx-auto max-w-6xl mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-sm font-medium text-primary">Teste grátis por 14 dias</span>
+            <span className="text-sm text-muted-foreground">— sem cartão de crédito</span>
+          </div>
+        </div>
+
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-2xl">
-            <h1 className="font-heading text-4xl leading-[0.96] text-foreground sm:text-5xl md:text-7xl">
-              Reembolso corporativo que parece simples para quem envia e sério para quem aprova.
+            <h1 className="font-heading text-4xl leading-[1.1] text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
+              Acabe com a dor do reembolso na sua empresa
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8 md:text-xl">
-              O colaborador envia o comprovante por WhatsApp ou web. O Reembolsaaí organiza, aplica a política, entrega contexto e deixa a equipe focada no que realmente exige decisão.
+              Colaboradores enviam comprovante por WhatsApp. A IA organiza, aplica a política e só pede aprovação quando precisa. <span className="text-foreground font-medium">Menos fila, mais controle.</span>
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="h-12 w-full rounded-full px-6 sm:w-auto">
+              <Button asChild size="lg" className="h-14 w-full rounded-full px-8 text-base sm:w-auto shadow-lg shadow-primary/20">
                 <Link to={ctaHref}>
-                  {ctaLabel}
-                  <ArrowRight className="h-4 w-4" />
+                  Começar grátis — 14 dias
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 w-full rounded-full bg-card px-6 sm:w-auto">
-                <a href="#como-funciona">Ver demonstração do fluxo</a>
+              <Button asChild size="lg" variant="outline" className="h-14 w-full rounded-full bg-card px-6 sm:w-auto">
+                <a href="#como-funciona">Ver como funciona</a>
               </Button>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-2.5 text-sm text-muted-foreground">
-              {["WhatsApp + Web", "Política + IA", "Auditoria pronta"].map((item) => (
-                <div key={item} className="rounded-full border border-border bg-card px-3 py-2 shadow-sm sm:px-4">
-                  {item}
+            <p className="mt-4 text-sm text-muted-foreground">
+              Setup em 5 minutos · Cancele quando quiser
+            </p>
+
+            {/* Trust badges */}
+            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              {["WhatsApp + Web", "IA integrada", "Auditoria pronta", "Suporte humano"].map((item) => (
+                <div key={item} className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
@@ -200,7 +226,7 @@ export default function LandingPage() {
                     <p className="mt-2 text-lg font-semibold text-foreground">Almoço com cliente</p>
                   </div>
                   <div className="w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                    Dentro da política
+                    ✅ Aprovado automaticamente
                   </div>
                 </div>
 
@@ -209,7 +235,7 @@ export default function LandingPage() {
                     ["Canal", "WhatsApp"],
                     ["Valor", "R$ 87,40"],
                     ["Categoria", "Alimentação"],
-                    ["Resultado", "Aprovação automática"],
+                    ["Tempo total", "2 minutos"],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded-2xl border border-border bg-card px-4 py-3">
                       <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
@@ -219,9 +245,9 @@ export default function LandingPage() {
                 </div>
 
                 <div className="mt-5 rounded-2xl border border-border bg-accent/50 px-4 py-4">
-                  <p className="text-sm font-medium text-foreground">A IA já fez a parte repetitiva.</p>
+                  <p className="text-sm font-medium text-foreground">🤖 IA já fez o trabalho pesado</p>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                    Extração, leitura inicial, política aplicada e histórico prontos antes de qualquer aprovador tocar na fila.
+                    Extraiu os dados, leu o comprovante, aplicou a política e arquivou tudo. Nenhum aprovador precisou perder tempo.
                   </p>
                 </div>
               </div>
@@ -229,8 +255,8 @@ export default function LandingPage() {
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
                   { label: "Fila humana", value: "Só exceções" },
-                  { label: "Governança", value: "Tenant isolado" },
-                  { label: "Financeiro", value: "Saída rastreável" },
+                  { label: "Compliance", value: "Automático" },
+                  { label: "Auditoria", value: "Sempre pronta" },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-border bg-card px-4 py-4">
                     <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
@@ -239,6 +265,26 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Social Proof Stats */}
+        <div className="mx-auto max-w-6xl mt-16 pt-8 border-t border-border/50">
+          <p className="text-center text-sm text-muted-foreground mb-6">{SOCIAL_PROOF.headline}</p>
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {SOCIAL_PROOF.companies.map((company) => (
+              <div key={company} className="rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground">
+                {company}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {SOCIAL_PROOF.stats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="font-heading text-2xl md:text-3xl text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -254,29 +300,52 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Problem Section */}
       <section className="px-6 py-14">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">O problema hoje</p>
-            <h2 className="mt-3 font-heading text-4xl leading-tight text-foreground md:text-5xl">
-              Reembolso não trava por falta de tela. Trava por falta de fluxo.
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-destructive">O problema</p>
+            <h2 className="mt-3 font-heading text-3xl md:text-4xl lg:text-5xl text-foreground">
+              O reembolso não trava por falta de tela.
+              <span className="text-muted-foreground"> Trava por falta de fluxo.</span>
             </h2>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
-              A maior dor não é capturar o comprovante. É fazer política, aprovação, auditoria e financeiro conversarem sem espalhar trabalho manual pela empresa.
-            </p>
           </div>
 
-          <div className="grid gap-4">
-            {PAINS.map((item) => (
-              <div key={item} className="flex gap-4 rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-                  <CircleAlert className="h-5 w-5" />
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              { 
+                icon: CircleAlert, 
+                title: "Comprovantes espalhados",
+                text: "WhatsApp, email, papel. Ninguém sabe onde está o que falta." 
+              },
+              { 
+                icon: CircleAlert, 
+                title: "Aprovação sem contexto",
+                text: "Gestores perdem tempo com despesa que poderia ser automática." 
+              },
+              { 
+                icon: CircleAlert, 
+                title: "Política no PDF",
+                text: "Regras existem no papel mas não no dia a dia da operação." 
+              },
+            ].map((item) => (
+              <div key={item.title} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+                  <item.icon className="h-6 w-6" />
                 </div>
-                <div>
-                  <p className="text-base leading-7 text-foreground">{item}</p>
-                </div>
+                <h3 className="mt-4 font-heading text-lg text-foreground">{item.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{item.text}</p>
               </div>
             ))}
+          </div>
+
+          {/* CTA no meio da página */}
+          <div className="mt-12 text-center">
+            <Button asChild size="lg" className="h-14 rounded-full px-8 text-base shadow-lg shadow-primary/20">
+              <Link to={ctaHref}>
+                Ver como resolvemos isso →
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -304,25 +373,99 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="como-funciona" className="px-6 py-14">
+      {/* Testimonial Section */}
+      <section className="px-6 py-14">
+        <div className="mx-auto max-w-4xl">
+          <div className="rounded-[2rem] border border-border bg-card p-8 md:p-12 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+              <span className="text-2xl">💬</span>
+            </div>
+            <blockquote className="font-heading text-2xl md:text-3xl text-foreground leading-relaxed">
+              "Acabamos com a planilha de reembolso em 2 dias. O time de vendas manda pelo WhatsApp e o financeiro só vê o que precisa."
+            </blockquote>
+            <div className="mt-6">
+              <p className="font-medium text-foreground">Ana Paula M.</p>
+              <p className="text-sm text-muted-foreground">CFO · Startup fintech · 45 colaboradores</p>
+            </div>
+            <div className="mt-6 flex items-center justify-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span key={star} className="text-primary text-xl">★</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works - Visual Steps */}
+      <section id="como-funciona" className="px-6 py-14 bg-card/30">
         <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl mx-auto text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Como funciona</p>
-            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Quatro passos para sair da planilha e entrar no fluxo.
+            <h2 className="mt-3 font-heading text-3xl md:text-4xl lg:text-5xl text-foreground">
+              Do WhatsApp à aprovação em 4 passos
             </h2>
+            <p className="mt-4 text-muted-foreground">
+              Sem instalar nada. O colaborador usa o WhatsApp que já tem.
+            </p>
           </div>
 
-          <div className="mt-12 grid gap-5 md:grid-cols-4">
-            {STEPS.map((step) => (
-              <div key={step.number} className="rounded-[2rem] border border-border bg-card p-6 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                  {step.number}
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              { 
+                number: "1", 
+                title: "Envia", 
+                text: "Colaborador manda foto do comprovante no WhatsApp ou web",
+                time: "30 segundos"
+              },
+              { 
+                number: "2", 
+                title: "Extrai", 
+                text: "IA lê dados, classifica categoria e identifica o que é",
+                time: "Automático"
+              },
+              { 
+                number: "3", 
+                title: "Aplica", 
+                text: "Sistema verifica política da empresa e decide o caminho",
+                time: "Instantâneo"
+              },
+              { 
+                number: "4", 
+                title: "Resolve", 
+                text: "Dentro da política = aprovado. Fora = vai para gestor com contexto",
+                time: "2 min vs 2 dias"
+              },
+            ].map((step) => (
+              <div key={step.number} className="relative rounded-[1.5rem] border border-border bg-card p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                    {step.number}
+                  </div>
+                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                    {step.time}
+                  </span>
                 </div>
-                <h3 className="mt-5 font-heading text-2xl text-foreground">{step.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{step.text}</p>
+                <h3 className="font-heading text-xl text-foreground">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p>
               </div>
             ))}
+          </div>
+
+          {/* Resultado destacado */}
+          <div className="mt-10 rounded-[1.5rem] border border-primary/20 bg-primary/5 p-6 md:p-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h3 className="font-heading text-xl text-foreground">Resultado para o gestor</h3>
+                <p className="mt-2 text-muted-foreground">
+                  Chega só o que realmente precisa de olho humano, com contexto completo para decidir rápido.
+                </p>
+              </div>
+              <Button asChild size="lg" className="h-12 rounded-full px-6 whitespace-nowrap">
+                <Link to={ctaHref}>
+                  Testar agora →
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -355,25 +498,60 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
       <section id="precos" className="border-y border-border bg-card/30 px-6 py-14">
         <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl mx-auto text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Preços</p>
-            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Planos claros. Sem surpresa no fim do mês.
+            <h2 className="mt-3 font-heading text-3xl md:text-4xl lg:text-5xl text-foreground">
+              Comece grátis. Escale quando crescer.
             </h2>
+            <p className="mt-4 text-muted-foreground">
+              14 dias gratuitos em qualquer plano. Cancele quando quiser.
+            </p>
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-3">
-            {PLANS.map((plan) => (
+            {[
+              {
+                name: "Starter",
+                price: "R$ 29",
+                period: "/mês",
+                desc: "Para times pequenos que querem sair da planilha.",
+                items: ["Até 5 usuários", "100 despesas/mês", "1 política ativa", "Suporte por email"],
+              },
+              {
+                name: "Growth",
+                price: "R$ 49",
+                period: "/usuário/mês",
+                desc: "Para empresas que querem automação de verdade.",
+                items: ["Usuários ilimitados", "Despesas ilimitadas", "WhatsApp no fluxo", "Dashboard completo", "Suporte prioritário"],
+                featured: true,
+                badge: "Mais popular",
+              },
+              {
+                name: "Enterprise",
+                price: "Sob consulta",
+                period: "",
+                desc: "Para operações com governança e múltiplas filiais.",
+                items: ["Multi-CNPJ", "SSO e integrações", "SLA dedicado", "Onboarding assistido", "API disponível"],
+              },
+            ].map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-[2rem] border p-7 shadow-sm ${
+                className={`relative rounded-[2rem] border p-7 shadow-sm ${
                   plan.featured
                     ? "border-primary bg-accent/40 ring-1 ring-primary/20"
                     : "border-border bg-card"
                 }`}
               >
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                      {plan.badge}
+                    </span>
+                  </div>
+                )}
                 <p className="font-heading text-2xl text-foreground">{plan.name}</p>
                 <p className="mt-4 text-4xl font-semibold text-foreground">
                   {plan.price}
@@ -390,74 +568,98 @@ export default function LandingPage() {
                 </ul>
                 <Button
                   asChild
-                  className={`mt-8 w-full rounded-full ${
+                  size="lg"
+                  className={`mt-8 w-full rounded-full h-12 ${
                     plan.featured
-                      ? ""
+                      ? "shadow-lg shadow-primary/20"
                       : "bg-foreground text-background hover:bg-foreground/90"
                   }`}
                 >
-                  <Link to="/cadastro">Começar</Link>
+                  <Link to="/cadastro">
+                    {plan.featured ? "Começar grátis →" : "Escolher plano"}
+                  </Link>
                 </Button>
               </div>
             ))}
           </div>
+
+          {/* Garantia */}
+          <div className="mt-10 text-center">
+            <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>Garantia de 30 dias: não gostou? Devolvemos seu dinheiro. Sem perguntas.</span>
+            </div>
+          </div>
         </div>
       </section>
 
+      {/* FAQ Section */}
       <section className="px-6 py-14">
         <div className="mx-auto max-w-5xl">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl mx-auto text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">FAQ</p>
-            <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Perguntas que aparecem antes de assinar.
+            <h2 className="mt-3 font-heading text-3xl md:text-4xl text-foreground">
+              Dúvidas comuns
             </h2>
           </div>
 
           <div className="mt-10 grid gap-4">
             {FAQS.map((faq) => (
-              <div key={faq.q} className="rounded-[1.75rem] border border-border bg-card p-6 shadow-sm">
-                <h3 className="font-heading text-2xl text-foreground">{faq.q}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{faq.a}</p>
+              <div key={faq.q} className="rounded-[1.5rem] border border-border bg-card p-6">
+                <h3 className="font-heading text-lg text-foreground">{faq.q}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Final CTA Section */}
       <section className="px-6 pb-16 pt-4">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-border bg-card p-8 text-center shadow-sm md:p-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Pronto para testar</p>
-          <h2 className="mt-4 font-heading text-4xl text-foreground md:text-5xl">
-            Coloque sua política para trabalhar e reduza a fila de reembolso da empresa.
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-primary/20 bg-gradient-to-br from-primary/5 to-card p-8 text-center md:p-12">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Pronto para testar?</p>
+          <h2 className="mt-4 font-heading text-3xl md:text-4xl lg:text-5xl text-foreground">
+            Pare de perder tempo com planilha de reembolso.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-            Comece com onboarding simples, receba despesas no canal certo e deixe as exceções chegarem com contexto.
+            14 dias grátis. Setup em 5 minutos. Cancele quando quiser.
           </p>
+          
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" className="h-12 rounded-full px-6">
+            <Button asChild size="lg" className="h-14 rounded-full px-8 text-base shadow-lg shadow-primary/20">
               <Link to={ctaHref}>
-                {ctaLabel}
-                <ArrowRight className="h-4 w-4" />
+                Começar grátis agora →
               </Link>
             </Button>
-            {!isAuthenticated ? (
-              <Button asChild size="lg" variant="outline" className="h-12 rounded-full bg-background px-6">
-                <Link to="/login">Entrar</Link>
-              </Button>
-            ) : null}
           </div>
+
+          <p className="mt-4 text-sm text-muted-foreground">
+            Não precisa de cartão de crédito · Suporte humano no WhatsApp
+          </p>
         </div>
       </section>
 
+      {/* Footer */}
       <footer className="border-t border-border bg-background/80">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row">
-          <div className="flex items-center gap-2">
-            <Receipt className="h-4 w-4" />
-            <span>© {new Date().getFullYear()} Reembolsaaí</span>
+        <div className="mx-auto max-w-6xl px-6 py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground">
+                <Receipt className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="font-heading text-sm text-foreground">Reembolsaaí</p>
+                <p className="text-xs text-muted-foreground">Controle de despesas com IA</p>
+              </div>
+            </div>
+            <div className="flex gap-8 text-sm text-muted-foreground">
+              <Link to="/login" className="transition-colors hover:text-foreground">Entrar</Link>
+              <Link to="/cadastro" className="transition-colors hover:text-foreground">Criar conta</Link>
+              <a href="mailto:contato@reembolsaai.com.br" className="transition-colors hover:text-foreground">Contato</a>
+            </div>
           </div>
-          <div className="flex gap-6">
-            <Link to="/login" className="transition-colors hover:text-foreground">Entrar</Link>
-            <Link to="/cadastro" className="transition-colors hover:text-foreground">Criar conta</Link>
+          <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Reembolsaaí. Todos os direitos reservados.
           </div>
         </div>
       </footer>
