@@ -1,5 +1,5 @@
 import React from "react";
-import { Pencil, Trash2, MoreHorizontal, RotateCcw } from "lucide-react";
+import { Pencil, Trash2, MoreHorizontal, RotateCcw, CheckCircle2, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
@@ -8,6 +8,42 @@ import { motion, AnimatePresence } from "framer-motion";
 import RoleBadge from "./RoleBadge";
 import StatusDot from "./StatusDot";
 import UserAvatar from "./UserAvatar";
+
+// Componente para mostrar quem o usuário aprova
+function ApprovalRelation({ role }) {
+  if (role === "aprovador") {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">
+          <Users className="w-3 h-3" />
+          Todos os colaboradores
+        </span>
+      </div>
+    );
+  }
+  if (role === "admin") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">
+        <CheckCircle2 className="w-3 h-3" />
+        Todos
+      </span>
+    );
+  }
+  if (role === "financeiro") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border bg-chart-4/10 text-chart-4 border-chart-4/20">
+        <CheckCircle2 className="w-3 h-3" />
+        Aprovados para pagar
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+      <User className="w-3 h-3" />
+      Envia para aprovador
+    </span>
+  );
+}
 
 export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) {
   return (
@@ -19,6 +55,7 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
             <tr className="border-b border-border bg-secondary/50">
               <th className="text-left px-5 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Usuário</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Papel</th>
+              <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Aprova</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">WhatsApp</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Departamento</th>
               <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">Status</th>
@@ -49,6 +86,9 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                   </td>
                   <td className="px-4 py-3.5">
                     <RoleBadge role={user.role} />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <ApprovalRelation role={user.role} />
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="font-mono text-sm text-muted-foreground">{user.telefone || "—"}</span>
@@ -123,9 +163,13 @@ export default function UsersTable({ users, onEdit, onRemove, onResendInvite }) 
                 <div className="min-w-0">
                   <p className="text-foreground text-sm font-medium truncate">{user.name}</p>
                   <p className="text-muted-foreground text-xs truncate">{user.email}</p>
-                  <p className="text-muted-foreground text-xs font-mono truncate mb-1.5">{user.telefone || "—"}</p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <p className="text-muted-foreground text-xs font-mono truncate mb-1">{user.telefone || "—"}</p>
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <RoleBadge role={user.role} />
+                    <span className="text-muted-foreground">·</span>
+                    <ApprovalRelation role={user.role} />
+                  </div>
+                  <div className="mt-1.5">
                     <StatusDot status={user.status} />
                   </div>
                 </div>
