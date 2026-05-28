@@ -30,3 +30,6 @@ dist-ssr
 .env
 .vite
 .vercel
+
+# Artefatos de captura do Playwright MCP
+.playwright-mcp/

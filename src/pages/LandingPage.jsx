@@ -71,7 +71,7 @@ const STEPS = [
 const METRICS = [
   { value: "3 min", label: "para um colaborador enviar a despesa" },
   { value: "1 fluxo", label: "para onboarding, política, envio e aprovação" },
-  { value: "0 caos", label: "quando a política deixa de ser PDF solto" },
+  { value: "0 retrabalho", label: "quando a política deixa de ser PDF solto" },
   { value: "100%", label: "de rastreabilidade entre comprovante e decisão" },
 ];
 
@@ -134,7 +134,7 @@ export default function LandingPage() {
             </div>
             <div className="min-w-0">
               <p className="truncate font-heading text-sm text-foreground sm:text-base">Reembolsaaí</p>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">expense control</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Controle de despesas</p>
             </div>
           </Link>
 
@@ -286,7 +286,7 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Benefícios</p>
             <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Um produto para vender simplicidade sem perder controle.
+              Simples para quem envia. Rigoroso para quem aprova.
             </h2>
           </div>
 
@@ -309,7 +309,7 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Como funciona</p>
             <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Uma jornada simples para gerar confiança e venda.
+              Quatro passos para sair da planilha e entrar no fluxo.
             </h2>
           </div>
 
@@ -330,9 +330,9 @@ export default function LandingPage() {
       <section className="px-6 py-14">
         <div className="mx-auto grid max-w-6xl gap-8 rounded-[2.25rem] border border-border bg-card p-8 shadow-sm md:grid-cols-[0.95fr_1.05fr] md:p-10">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Por que converte</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">Para cada papel</p>
             <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              A promessa é clara: menos atrito para o colaborador, mais critério para a empresa.
+              Menos atrito para o colaborador. Mais critério para a empresa.
             </h2>
           </div>
 
@@ -360,7 +360,7 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Preços</p>
             <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Planos claros para vender sem fricção.
+              Planos claros. Sem surpresa no fim do mês.
             </h2>
           </div>
 
@@ -409,7 +409,7 @@ export default function LandingPage() {
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">FAQ</p>
             <h2 className="mt-3 font-heading text-4xl text-foreground md:text-5xl">
-              Perguntas que aparecem antes da venda.
+              Perguntas que aparecem antes de assinar.
             </h2>
           </div>
 

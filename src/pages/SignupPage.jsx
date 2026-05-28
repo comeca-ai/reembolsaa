@@ -103,7 +103,7 @@ export default function SignupPage() {
             </div>
             <div>
               <p className="font-heading text-base text-foreground">Reembolsaaí</p>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">expense control</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Controle de despesas</p>
             </div>
           </Link>
 

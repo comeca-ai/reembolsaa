@@ -11,9 +11,13 @@ import { useAuth } from "@/lib/AuthContext";
 // Nunca carregamos os dois tokens na mesma página: o SDK é injetado UMA única vez
 // por carga, com o token certo conforme o estado de auth quando ele resolve. A
 // visibilidade da bolha é ajustada por rota (esconde no /login).
-const BASE_URL = "https://chatwoot-production-1e1f.up.railway.app";
+// Cada inbox vive em uma instância de Chatwoot diferente:
+// - Público (landing) → instância nova em atendimento.oreembolsobot.app
+// - Logado (atendimento) → instância antiga no Railway
+const BASE_URL_PUBLICO = "https://atendimento.oreembolsobot.app";
+const BASE_URL_LOGADO = "https://chatwoot-production-1e1f.up.railway.app";
 
-const TOKEN_PUBLICO = "fbNpR1KvZXnDhQEemB5W38ij";  // deslogado (público)
+const TOKEN_PUBLICO = "eiWrqkST7i3QpmDg5BbXNQiy";  // deslogado (público)
 const TOKEN_LOGADO = "xbc97LYPu1mLoxNeeEiLkUei";   // logado (atendimento)
 
 // Rotas onde o chat NÃO deve aparecer.
@@ -24,7 +28,7 @@ const ocultarNaRota = (path) => SEM_WIDGET.some((p) => path === p || path.starts
 // double-mount do StrictMode em dev.
 let sdkInitialized = false;
 
-function initChatwoot(websiteToken, settings) {
+function initChatwoot(websiteToken, baseUrl, settings) {
   if (sdkInitialized) return;
   sdkInitialized = true;
 
@@ -35,11 +39,11 @@ function initChatwoot(websiteToken, settings) {
     }
 
     const script = document.createElement("script");
-    script.src = `${BASE_URL}/packs/js/sdk.js`;
+    script.src = `${baseUrl}/packs/js/sdk.js`;
     script.async = true;
     script.onload = () => {
       try {
-        window.chatwootSDK?.run({ websiteToken, baseUrl: BASE_URL });
+        window.chatwootSDK?.run({ websiteToken, baseUrl });
       } catch {
         /* SDK indisponível — segue sem chat, sem quebrar o app */
       }
@@ -74,9 +78,9 @@ export default function ChatwootWidget() {
       // sair dela (navegação no SPA), o efeito roda de novo e injeta.
       if (oculto) return;
       if (isAuthenticated) {
-        initChatwoot(TOKEN_LOGADO, null); // atendimento ao usuário logado
+        initChatwoot(TOKEN_LOGADO, BASE_URL_LOGADO, null); // atendimento ao usuário logado
       } else {
-        initChatwoot(TOKEN_PUBLICO, {
+        initChatwoot(TOKEN_PUBLICO, BASE_URL_PUBLICO, {
           position: "right",
           type: "standard",
           launcherTitle: "Fale conosco no chat",
